@@ -746,6 +746,77 @@ result = isHostMethod(xhr, 'foo'); // false
 */
 
 
+/*
+*
+* 第13章 事件
+*
+*/
+
+var div = document.getElementById('myDiv');
+EventUtil.addHandler(div, 'click', function(event) {
+	event = EventUtil.getEvent(event);
+	alert('client coordinates:' + event.clientX + ',' + event.clientY);
+});
+
+// 以下代码可以取得鼠标事件在页面（而非视口）中的坐标，
+var div = document.getElementById('myDiv');
+EventUtil.addHandler(div, 'click', function(event) {
+	event = EventUtil.getEvent(event);
+	alert('Page coordinates：' + event.pageX + ',' + event.pageY);
+});
+
+// 鼠标事件的屏幕坐标
+var div = document.getElementById('myDiv');
+EventUtil.addHandler(div, 'click', function(event) {
+	event = EventUtil.getEvent(event);
+	alert('Screen coordinatesL：' + event.screenX + ',' + event.screenY);
+})
+
+
+// 修改键
+var div = document.getElementById('myDiv');
+EventUtil.addHandler(div, 'click', function(event) {
+	event = EventUtil.getEvent(event);
+	var keys = new Array();
+
+	if(event.shiftKey) {
+		keys.push('shift');
+	}
+
+	if(event.ctrlKey) {
+		keys.push('ctrl');
+	}
+
+	if(event.altKey) {
+		keys.push('alt');
+	}
+
+	if(event.metaKey) {
+		keys.push('meta');
+	}
+
+	alert('Keys:' + keys.join(','));
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
