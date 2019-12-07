@@ -799,9 +799,14 @@ EventUtil.addHandler(div, 'click', function(event) {
 })
 
 
+// 13.4.4 键盘与文本事件
 
-
-
+// keyup事件获取keyCode
+var textbox = document.getElementById('myText');
+EventUtil.addHandler(textbox, 'keyup', function(event) {
+	event = EventUtil.getEvent(event);
+	alert(event.keyCode);
+});
 
 
 
