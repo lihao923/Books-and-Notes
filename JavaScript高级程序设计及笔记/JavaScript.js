@@ -810,6 +810,304 @@ EventUtil.addHandler(textbox, 'keyup', function(event) {
 
 
 
+// 13.6 模拟事件
+
+// 模拟对按钮的单击事件
+var btn = document.getElementById('myBtn');
+var event = document.createEvent('MouseEvents');
+event.initMouseEvent('click', true, true, document.defaultView, 0, 0, 0, 0, 0, false, false, false, fase, 0, null); // 初始化事件对象
+btn.dispatchEvent(event); // 触发事件
+
+// 模拟键盘keydown事件(这个例子模拟的是按住Shift的同时又按下A键)
+var textbook = document.getElementById('myTextbox'), event;
+if (document.implementation.hasFeature('KeyboardEvents', '3.0')) {
+	event = document.createEvent('KeyboardEvent');
+	event.initKeyboardEvent('keydown', true, true, document.defaultView, 'a', 0, 'Shift', 0);
+	textbox.dispatchEvent(event);
+}
+
+// IE模拟按钮触发click事件的过程
+var btn = document.getElementById('myBtn');
+var event = document.createEventObject();
+
+event.screenX = 100;
+event.screenY = 0;
+event.clientX = 0;
+event.clientY = 0;
+event.ctrlKey = false;
+event.altKey = false;
+event.shiftKey = false;
+event.button = 0;
+btn.fireEvent('onclick', event);
+
+// IE模拟keypress事件
+var textbox = document.getElementById('myTextbox');
+var event = document.createEventObject();
+
+event.altKey = false;
+event.ctrlKey = false;
+event.shiftKey = false;
+event.keyCode = 65;
+textbox.fireEvent('onKeypress', event);
+
+
+
+/*
+*
+* 第14章 表单脚本
+*
+*/
+
+
+// 14.1.3 表单字段
+
+
+// change(), focus(), blur()
+var textbox = document.forms[0].elements[0];
+EventUtil.addHandler(textbox, 'focus', function(event) {
+	event = EventUtil.getEvent(event);
+	var target EventUtil.getTarget(event);
+	if(target.style.backgroundColor != 'red') {
+		target.style.backgroundColor = 'yellow';
+	}
+});
+
+EventUtil.addHandler(textbox, 'blur', function(event) {
+	event = EventUtil.getEvent(event);
+	var target = EventUtil.getTarget(event);
+	
+	if(/[^\d]/.test(target.value)) {
+		target.style.backgroundColor = 'red';
+	} else {
+		target.style.backgroundColor = '';
+	}
+});
+
+EventUtil.addHandler(textbox, 'change', function(evnet) {
+	event = EventUtil.getEvent(event);
+	var target = EventUtil.getTarget(event);
+
+	if(/[^\d]/.test(target.value)) {
+		target.style.backgroundColor = 'red';
+	} else {
+		target.style.backgroundColor = 'yellow';
+	}
+})
+
+// 14.2.2 过滤输入
+
+// 屏蔽所有按键
+EventUtil.addHandler(textbox, 'keypress', function(event) {
+	event = EventUtil.getEvent(event);
+	EventUtil.preventDefault(event);
+});
+
+// 只允许用户输入数值
+EventUtil.addHandler(textbox, 'keypress', function(event) {
+	event = EventUtil.getEvent(event);
+	var target = EventUtil.getTarget(event);
+	var charCode = EventUtil.getCharCode(event);
+
+	if(!/\d/.test(String.fromCharCode(charCode)) && charCode > 9 && !event.ctrlKey) {
+		EventUtil.preventDefault(event);
+	}
+})
+
+// 添加粘贴事件相关内容
+var EventUtil = {
+	// 省略的代码
+	
+	getClipboardText: function(event) {
+		var clipboardData = (event.clipboardData || window.clipboardData);
+		return clipboardData.getData('text');
+	},
+
+	// 省略的代码
+
+	setClipboardText: function(event, value) {
+		if(event.clipboardData) {
+			return event.clipboardData.setData('text/plain', value);
+		} else if(window.clipboardData) {
+			return window.clipboardData.setData('text', value);
+		}
+	}
+
+	// 省略的代码
+};
+
+// 在paste事件中，检测剪贴板的值是否有效
+EventUtil.addHandler(textbox, 'paste', function(event) {
+	event = EventUtil.getEvent(event);
+	var text = EventUtil.getClipboardText(event);
+
+	if(!/^\d*$/.test(text)) {
+		EventUtil.preventDefault(event);
+	}
+});
+
+
+// 自动切换焦点
+(function() {
+	function tabForward(event) {
+		event = EventUtil.getEvent(event);
+		var target = EventUtil.getTarget(event);
+
+		if(target.value.length == target.maxLength) {
+			var form = target.form;
+			
+			for(var i = 0; len = form.elements.length; i < len; i++) {
+				if(form.elements[i] == target) {
+					if(form.elements[i + 1]) {
+						form.elements[i + 1].focus();
+					}
+					return;
+				}
+			}
+		}
+	}
+
+	var textbox1 = document.getElementById('textTel1');
+	var textbox2 = document.getElementById('textTel2');
+	var textbox3 = document.getElementById('textTel3');
+
+	EventUtil.addHandler(textbox1, 'keyup', tabForward);
+	EventUtil.addHandler(textbox2, 'keyup', tabForward);
+	EventUtil.addHandler(textbox3, 'keyup', tabForward);
+})();
+
+// 检测表单是否为必填字段
+var isUsernameRequired = document.forms[0].elements['username'].required;
+
+// 检测浏览器是否支持表单required属性
+var isRequiredSupported = 'required' in document.createElement('input');
+
+// 使用checkValidity()方法可以检测表单中的某个字段是否有效
+if(document.forms[0].elements[0].checkValidity()) {
+	// 字段有效，继续
+} else {
+	// 字段无效
+}
+
+// 通过validity属性检测表单的有效性
+if(input.validity && !input.validity.valid) {
+	if(input.validity.valueMissing) {
+		alert('Please specify a value!');
+	} else if(input.validity.typeMismatch) {
+		alert('Please enter an email address!');
+	} else {
+		alert('Value is invalid!')
+	}
+}
+
+// 禁用验证
+document.forms[0].elements['btnNoValidate'].formNoValidate = true;
+document.forms[0].elements['btnNoValidate'].formNoValidate = true;
+
+// 实现表单序列化代码
+function serialize(form) {
+	var parts = [],
+		filed = null,
+		i,
+		len,
+		j,
+		optLen,
+		option
+		optValue;
+	for(i = 0; len = form.elements.length; i < len; i++) {
+		field = form.elements[i];
+
+		switch(field.type) {
+			case 'select-one':
+			case 'select-multiple':
+				if(filed.name.length) {
+				for(j = 0; optLen = field.options.length; j < optLen; j++) {
+					option = field.options[j];
+					if(option.selected) {
+						optValue = '';
+						if(option.hasAttribute) {
+							optValue = (option.hasAttribute('value') ? option.value : option.text);
+						} else {
+							optValue = (option.attribute['value'].specified ? option.value : option.text);
+						}
+
+						parts.push(encodeURIComponent(field.name) + '=' + encodeURIComponent(optValue));
+					}
+				}
+			}
+			break;
+
+		case undefined:
+		case 'file':
+		case 'submit':
+		case 'reset':
+		case 'button':
+			break;
+		
+		case 'radio':
+		case 'checkbox':
+			if(!field.checked) {
+				break;
+			}
+			// 执行默认操作
+		default:
+			// 不包含任何表单字段
+			if(field.name.length) {
+				parts.push(encodeURIComponent(field.name) + '=' + encodeURIComponent(filed.value));
+			}
+		}
+	}
+	return parts.join('&');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
