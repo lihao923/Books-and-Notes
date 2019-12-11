@@ -1060,15 +1060,34 @@ function serialize(form) {
 }
 
 
+/*
+*
+* 第16章 HTML5脚本编程
+*
+*/
 
 
+/*
+* 16.1 跨文档消息传递
+*/
+var iframeWindow = document.getElementById('myframe').contentWindow;
+iframeWindow.postMessage('a secret!', 'http://www.wrox.com');
 
+// 接收到消息后验证发送窗口的来源
+EventUtil.addHandler(window, 'message', function(event) {
+	// 确保发送消息的域是已知的域
+	if(event.origin == 'http://www.wrox.com') {
+		// 处理接收到的数据
+		processMessage(event.data);
 
+		// 可选：向来源窗口发送回执
+		event.source.postMessage('Received!', 'http://p2p.wrox.com');
+	}
+});
 
-
-
-
-
+/*
+* 16.2 原生拖放
+*/
 
 
 
