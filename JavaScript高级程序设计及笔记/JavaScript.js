@@ -1089,11 +1089,16 @@ EventUtil.addHandler(window, 'message', function(event) {
 * 16.2 原生拖放
 */
 
+/*
+* 16.3 媒体元素
+*/
 
+// 嵌入视频
+<video src="conference.mpg" id="myVideo">Video player not available.</video>
 
-
-
-
+// 嵌入音频
+<audio src="song.mp3" id="myAudio">Audio player not available.</video>
+ 
 
 
 
