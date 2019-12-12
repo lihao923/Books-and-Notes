@@ -1098,7 +1098,6 @@ EventUtil.addHandler(window, 'message', function(event) {
 
 // 嵌入音频
 <audio src="song.mp3" id="myAudio">Audio player not available.</video>
- 
 
 
 
@@ -1111,25 +1110,109 @@ EventUtil.addHandler(window, 'message', function(event) {
 
 
 
+/*
+*
+* 第17章 错误处理与调试
+*
+*/
+
+try {
+	window.someNonexistentFunction();
+} catch(error) {
+	alert(error.message);
+}
+
+// finally子句
+function testFinally() {
+	try {
+		return 2;
+	} catch(error) {
+		return 1;
+	} finally {
+		return 0; // 无论如何一定会执行
+	}
+}
+// 0
 
 
+// 在 try-catch 语句的 catch 语句中使用 instanceof 操作符
+try {
+	someFunction();
+} catch(error) {
+	if(error instanceof TypeError) {
+		// 处理类型错误
+	} else if(error instanceof ReferenceError) {
+		// 处理引用错误
+	} else {
+		// 处理其他类型的错误
+	}
+}
+
+// 自定义错误类型
+function CustomError(message) {
+	this.name = 'CustomError';
+	this.message = message;
+}
+CustomError.prototype = new Error();
+throw new CustomError('My message!')
+
+//
+function process(values) {
+	if(!(values instanceof Array)) {
+		throw new Error('process(): Argument must be an Array.');
+	}
+
+	values.sort();
+	for(var i = 0; i < values.length; i++) {
+		if(values[i] > 100) {
+			return values[i];
+		}
+	}
+
+	return -1;
+}
+
+// 处理查询字符串的函数
+function addQueryStringArg(url, name, value) {
+	if(url.indexOf('?') == -1) {
+		url += '?';
+	} else {
+		url += '&';
+	}
+
+	url += encodeURIComponent(name) + '=' + encodeURIComponent(value);
+	return url;
+}
+
+// 使用
+var url = 'http://www.somedomain.com';
+var newUrl = addQueryStringArg(url, 'redir', 'http://www.someotherdomain.com?a=b&c=d');
+alert(newUrl);
 
 
+// 通过在 for 循环中添加 try-catch 语句，任何模块初始化时出错，都不会影响其他模块的初始化。
+for(var i = 0, len = mods.length; i < len; i++) {
+	try {
+		mods[i].init();
+	} catch(err) {
+		// 在这里处理错误
+	}
+}
 
+// 将数据写入错误日志中
+function logError(sev, msg) {
+	var img = new Image();
+	img.src = 'log.php?sev=' + encodeURIComponent(sev) + '&msg=' + encodeURIComponent(msg);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// 只要使用try-catch语句，就应该把相应错误记录到日志中
+for(var i = 0, len = mods.length; i < len; i++) {
+	try {
+		mods[i].init();
+	} catch(err) {
+		logError('nonfatal', 'Module init failed: ' + err.message);
+	}
+}
 
 
 
