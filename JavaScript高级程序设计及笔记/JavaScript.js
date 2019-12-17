@@ -1303,29 +1303,159 @@ var client = createStreamingClient('streaming.php', function(data) {
 */
 
 
+// 22.1.3 惰性载入函数
+// 方式一
+function createXHR() {
+	if(typeof XMLHttpRequest != 'undefined') {
+		createXHR = function() {
+			return new XMLHttpRequest();
+		}
+	} else if(typeof ActiveXObject != 'undefined') {
+		createXHR = function() {
+			if(typeof arguments.callee.activeXString != 'string') {
+				var versions = ['MSXML2.XMLHttp.6.0', 'MSXML2.XMLHttp.3.0', 'MSXML2.XMLHttp'],
+					i, len;
+				for(i = 0; len = versions.length; i < len; i++) {
+					try {
+						new ActiveXObject(versions[i]);
+						arguments.callee.activeXString = versions[i];
+						break;
+					} catch(ex) {
+						// skip
+					}
+				}
+			}
+			return new ActiveXOject(arguments.callee.activeXString);
+		};
+	} else {
+		createXHR = function() {
+			throw new Error('no XHR object available.');
+		}
+	}
+	return createXHR();
+}
+
+
+// 方式二
+var createXHR = (function() {
+	if(typeof XMLHttpRequest != 'undefined') {
+		return function() {
+			return new XMLHttpRequest();
+		}
+ 	} else if(typeof ActiveXObject != 'undefined') {
+		return function() {
+			if(typeof arguments.callee.activeXString != 'string') {
+				var versions = ['MSXML2.XMLHttp.6.0', 'MSXML2.XMLHttp.3.0', 'MSXML2.XMLHttp'],
+					i, len;
+				for(i = 0; len = versions.length; i < len; i++) {
+					try {
+						new ActiveXObject(versions[i]);
+						arguments.callee.activeXString = versions[i];
+						break;
+					} catch(ex) {
+						// skip
+					}
+				}
+			}
+			return new ActiveXObject(arguments.callee.activeXString);
+		};
+		return function() {
+			throw new Error('No XHR object available!')
+		};
+	}
+})();
 
 
 
+// 22.1.5 函数柯里化
+// 创建柯里化函数的通用方式
+function curry(fn) {
+	var args = Array.prototype.slice.call(arguments, 1);
+	return function() {
+		var innerArgs = Array.prototype.slice.call(arguments);
+		var finalArgs = args.concat(innerArgs);
+		return fn.apply(null, finalArgs);
+	}
+}
+
+function bind(fn, context) {
+	var args = Array.prototype.slice.call(arguments, 2);
+	return function() {
+		var innerArgs = Array.prototype.slice.call(arguments);
+		var finalArgs = args.concat(innerArgs);
+		return fn.apply(context, finalArgs);
+	}
+}
 
 
+// 数组分块处理
+function chunk(array, process, context) {
+	setTimeout(function() {
+		var item = array.shift();
+		process.call(context, item);
+
+		if(array.length > 0) {
+			setTimeout(arguments.callee, 100)
+		}
+	}, 100);
+}
+
+// 使用
+var data = [12,123,1234,453,436,23,23,5,4123,45,346,5634,2234,345,342];
+function printValue(item) {
+	var div = document.getElementById('myDiv');
+	div.innerHTML += item + '<br />';
+}
+// chunk(data, printValue);
+chunk(data.concat(), printValue);
 
 
+// 22.3.3 函数节流
 
+// 节流函数基本形式
+var processor = {
+	timeoutId: null,
 
+	// 实际进行处理的方法
+	performProcessing: function() {
+		// 实际执行的代码
+	},
+	
+	// 初始处理调用的方法
+	process: function() {
+		clearTimeout(this.timeoutId);
 
+		var that = this;
+		this.timeoutId = setTimeout(function() {
+			that.performProcessing();
+		}, 100);
+	}
+}
 
+// 尝试开始执行
+processor.process();
 
+// throttle简化
+function throttle(method, context) {
+	clearTimeout(method.tId);
+	method.tId = setTimeout(function() {
+		method.call(context);
+	}, 100);
+}
 
+window.onresize = function() {
+	var div = document.getElementById('myDiv');
+	div.style.height = div.offsetWidth + 'px';
+};
 
+function resizeDiv() {
+	var div = document.getElementById('myDiv');
+	div.style.height = div.offsetWidth + 'px';
+}
 
-
-
-
-
-
-
-
-
+window.onresize = function() {
+	throttle(resizeDiv);
+};
 
 
 
