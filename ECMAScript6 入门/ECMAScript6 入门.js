@@ -750,13 +750,6 @@ for(let [key, value] of map) {
 // 'second is world'
 
 
-
-
-
-
-
-
-
 // (7) 输入模块的指定方法
 const { SourceMapConsumer, SourceNode } = require('source-map')
 
@@ -769,10 +762,115 @@ const { SourceMapConsumer, SourceNode } = require('source-map')
 
 
 
+/*
+* 第三章 字符串的扩展
+*/
+
+/* 1.字符的Unicode表示法 */
+/* 2.字符串的遍历器接口 */
+// ES6 为字符串添加了遍历器接口，使得字符串可以被for...of循环遍历
+for(let codePoint of 'foo') {
+	console.log(codePoint);
+}
+// 'f'
+// 'o'
+// 'o'
+ 
+// 这个遍历器最大的优点是可以识别大于0xFFFF的码点，传统的for循环无法识别这样的码点
+let text = String.fromCodePoint(0x20BB7);
+for(let i = 0; i < text.length; i++) {
+	console.log(text[i]);
+}
+// ' '
+// ' '
+
+for(let i of text) {
+	console.log(i);
+}
+// "𠮷"
+
+/* 3.直接输入U+2028 和 U+2029 */
+/* 4.JSON.stringify()的改造 */
+/* 5.模板字符串 */
+// 如果在模板字符串中需要使用反引号，则前面要用反斜杠转义
+let greeting = `\`Yo\` World!`
+
+// 模板字符串中嵌入变量，需要将变量名写在${}之中
+function athorize(user, action) {
+	if(!user.hasPrivilege(action)) {
+		throw new Error(
+			// 传统写法
+			// 'User '
+			// + user.name
+			// + ' is not authorize to do '
+			// + action
+			// + '.'
+			`User ${user.name} is not authorzie to do ${action}.`
+		)
+	}
+}
+
+// 大括号内部可以放入任意的 JavaScript 表达式，可以进行运算，以及引用对象属性
+let x = 1;
+let y = 2;
+
+`${x} + ${y} = ${x + y}`
+// '1 + 2 = 3'
+`${x} + ${y * 2} = ${x + y * 2}`
+// '1 + 4 = 5'
+
+let obj = {x: 1, y: 2};
+`${obj.x + obj.y}`
+// 3
+
+// 模板字符串中还能调用函数
+function fn() {
+	return 'Hello World!';
+}
+
+`foo ${fn()} bar`
+// 'foo Hello World! bar'
+
+// 如果大括号中的值不是字符串，将按照一般的规则转为字符串。
+// 比如，大括号中是一个对象，将默认调用对象的toString方法
+
+
+// 模板字符串甚至还能嵌套
+const tmpl = addrs => 
+`<table>
+	${addrs.map(addr => 
+		`<tr><td>${addr.first}</td></tr>
+		<tr><td>${addr.last}</td></tr>`
+	).join('')}
+</table>`;
+
+// 上面代码中，模板字符串的变量之中，又嵌入了另一个模板字符串，使用方法如下
+const data = [
+    { first: '<Jane>', last: 'Bond' },
+    { first: 'Lars', last: '<Croft>' },
+];
+
+console.log(tmpl(data));
+// <table>
+//
+//   <tr><td><Jane></td></tr>
+//   <tr><td>Bond</td></tr>
+//
+//   <tr><td>Lars</td></tr>
+//   <tr><td><Croft></td></tr>
+//
+// </table>
+
+
+// 如果需要引用模板字符串本身，在需要时执行，可以写成函数
+let func = (name) => `Hello ${name}!`;
+func('Jack') // 'Hello Jack!'
 
 
 
-
+/* 6.实例：模板编译 */
+/* 7.标签模板 */
+/* 8.模板字符串的限制 */
 
 
 
