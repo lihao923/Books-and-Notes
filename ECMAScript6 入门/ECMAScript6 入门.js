@@ -946,7 +946,123 @@ div.innerHTML = parse({ supplies: ['broom', 'mop', 'cleaner'] });
 //     <li>cleaner</li>
 //   </ul>
 
+
 /* 7.标签模板 */
+
+alert `123`
+// 等同于
+alert(123)
+
+let a = 5;
+let b = 10;
+tag`Hello ${ a + b } world ${ a * b }`;
+// tag是函数， 等同于
+tag(['Hello ', ' world ', ''], 150, 50);
+// 上面代码中，模板字符串前面有一个标识名tag，它是一个函数。
+// 整个表达式的返回值，就是tag函数处理模板字符串后的返回值。
+
+// 函数tag依次会接收到多个参数
+function tag(stringArr, value1, value2) {
+	// ...
+}
+// 等同于
+function tag(stringArr, ...values) {
+	// ...
+}
+
+// 
+let a = 5;
+let b = 10;
+function tag(s, v1, v2) {
+	console.log(s[0]);
+	console.log(s[1]);
+	console.log(s[2]);
+	console.log(v1);
+	console.log(v2);
+
+	return 'OK';
+}
+
+tag`Hello ${ a + b } world ${ a * b }`;
+// 'Hello '
+// ' world '
+// ''
+// 15
+// 50
+// 'OK'
+
+// 下面这个例子展示了，如何将各个参数按照原来的位置拼合回去
+let total = 30;
+let msg = passthru`The total is ${total} (${total*1.05} with tax)`;
+
+function passthru(literals) {
+	let result = '';
+	let i = 0;
+
+	while(i < literals.length) {
+		result += literals[i++];
+		if(i < arguments.length) {
+			result += arguments[i];
+		}
+	}
+	return result;
+}
+msg // 'The total is 30(31.5 with tax)'
+
+// passthru函数采用 rest 参数的写法如下
+function passthru(literals, ...value) {
+	let output = '';
+	let index;
+	for(index = 0; index < value.length; index++) {
+		output += literals[index] + values[index];
+	}
+	output += literals[index]
+	return output;
+}
+
+// “标签模板”的一个重要应用，就是过滤 HTML 字符串，防止用户输入恶意内容
+let message = SaferHTML`<p>${sender} has sent you a message.</p>`;
+function SaferHTML(tempateData) {
+	let s = templateData[0];
+	for(let i = 0; i < arguments.length; i++) {
+		let arg = String(arguments[i]);
+
+		// Escape special characters in the substitution.
+		s += arg.replace(/$/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;');
+
+		// Don't escape special characters in the template.
+		s += templateData[i];
+	}
+	return s;
+}
+
+// 
+let sender = '<script>alert('abc')</script>'; // 恶意代码
+let message = SaferHTML`<p>${sender} has sent you a message.</p>`;
+
+message
+// <p>&lt;script&gt;alert("abc")&lt;/script&gt; has sent you a message.</p>
+
+// 标签模板的另一个应用，就是多语言转换（国际化处理）
+i18n`Welcome to &{siteName}, you are visitor nunber ${visitorNumber}!`
+// '欢迎访问xxx， 您是第xxx位访问者！'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* 8.模板字符串的限制 */
 
 
