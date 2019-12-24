@@ -1051,18 +1051,6 @@ i18n`Welcome to &{siteName}, you are visitor nunber ${visitorNumber}!`
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* 8.模板字符串的限制 */
 
 
@@ -1070,22 +1058,53 @@ i18n`Welcome to &{siteName}, you are visitor nunber ${visitorNumber}!`
 
 
 
+/*
+* 第四章 字符串的新增方法
+*/
 
 
+/* 1.String.fromCodePpint() */
+
+// ES5 提供"String.fromCharCode()"方法，用于从 Unicode 码点返回对应字符
+// 但是这个方法不能识别码点大于0xFFFF的字符
+String.fromCharCode(0x20BB7)
+// "ஷ"
 
 
+// ES6 提供了"String.fromCodePoint()"方法，可以识别大于0xFFFF的字符
+String.fromCodePoint(0x20BB7)
+// "𠮷"
+String.fromCodePoint(0x78, 0x1f680, 0x79) === 'x\uD83D\uDE80y'
+// true
+
+/* 2.String.raw() */
+
+String.raw`Hi\n${2+3}!`
+// 实际返回 "Hi\\n5!"，显示的是转义后的结果 "Hi\n5!"
+
+String.raw`Hi\u000A!`
+// 实际返回 "Hi\\u000A!"，显示的是转义后的结果 "Hi\u000A!"
+
+String.raw`Hi\\n`
+// 返回 "Hi\\\\n"
+
+String.raw`Hi\\n` === 'Hi\\\\n' // true
+
+// `foo${1 + 2}bar`
+// 等同于
+String.raw({raw: ['foo', 'bar']}, 1 + 2) // 'foo3bar'
 
 
+String.raw = function(strings, ...values) {
+	let output = '';
+	let index;
+	for(index = 0; index < values.length; index++) {
+		output += strings.raw[index] + values[index];
+	}
 
-
-
-
-
-
-
-
-
-
+	output += strings.raw[index]
+	return output;
+}
 
 
 
