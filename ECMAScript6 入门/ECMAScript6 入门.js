@@ -1106,6 +1106,71 @@ String.raw = function(strings, ...values) {
 	return output;
 }
 
+/* 3.实例方法: codePointAt() */
+// ES6 提供了codePointAt()方法，能够正确处理4个字节储存的字符
+// 返回一个字符的码点
+
+let s = '𠮷a';
+s.codePointAt(0); // 134071
+s.codePointAt(1); // 57271
+
+s.codePointAt(2); // 97
+
+
+let s = '𠮷a';
+for(let ch of s) {
+	console.log(ch.codePointAt(0).toString(16));
+}
+// 20bb7
+// 61
+
+let arr = [...'𠮷a'];
+arr.forEach(
+	ch => console.log(ch.codePointAt(0).toString(16));
+);
+// 20bb7
+// 61
+
+function is32Bit(c) {
+	return c.codePointAt(0) > 0xFFFF;
+}
+
+is32Bit('𠮷'); // true
+is32Bit('a'); // false
+
+
+/* 4.实例方法：normalize() */
+/* 5.实例方法：includes(), startsWith(), endsWidth() */
+let s = 'Hello world!';
+s.startsWith('Hello'); // true
+s.endsWith('!'); // true
+s.includes('o'); // true
+
+let s = 'Hello world!';
+s.startsWith('world', 6); // true
+s.endsWith('Hello', 5); // true
+s.includes('Hello', 6); // false
+
+
+/* 6.实例方法：repeat() */
+'x'.repeat(3) // 'xxx'
+'hello'.repeat(2) // 'hellohello'
+'na'.repeat(0) // ''
+'nana'.repeat(2.9) // 'nana'
+'na'.repeat(Infinity) // RangeError
+'na'.repeat(-1) // RangeError
+'na'.repeat(-0.9) // ''
+'na'.repeat(NaN) // ''
+'na'.repeat('na') // ''
+'na'.repeat('3') // 'nanana'
+
+
+/* 7.实例方法：padStart(), padEnd() */
+'x'.padStart(5, 'ab') // 'ababx'
+'x'.padStart(4, 'ab') // 'abax'
+
+'x'.padEnd(5, 'ab') // 'xabab'
+'x'.padEnd(4, 'ab') // 'xaba'
 
 
 
@@ -1118,9 +1183,7 @@ String.raw = function(strings, ...values) {
 
 
 
-
-
-
+/* 4.实例方法：normalize() */
 
 
 
