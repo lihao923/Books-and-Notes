@@ -1173,19 +1173,28 @@ s.includes('Hello', 6); // false
 'x'.padEnd(4, 'ab') // 'xaba'
 
 
+'xxx'.padStart(2, 'ab') // 'xxx'
+'xxx'.padEnd(2, 'ab') // 'xxx'
+
+'abc'.padStart(10, '0123456789') // '0123456abc'
+'x'.padStart(4) // '   x'
+'x'.padEnd(4) // '   x'
+
+'1'.padStart(10, '0') // '0000000001'
+'12'.padStart(10, '0') // '0000000012'
+'123456'.padStart(10, '0') // '0000123456'
+
+'12'.padStart(10, 'YYYY-MM-DD') // 'YYYY-MM-12'
+'09-12'.padStart(10, 'YYYY-MM-DD') // 'YYYY-09-12'
 
 
+/* 8.实例方法：trimStart(), trimEnd() */
+const s = ' abc ';
+s.trim() // 'abc'
+s.trimStart() // 'abc '
+s.trimEnd() // ' abc'
 
-
-
-
-
-
-
-
-/* 4.实例方法：normalize() */
-
-
+/* 9.实例方法：matchAll() */
 
 
 
