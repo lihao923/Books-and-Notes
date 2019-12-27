@@ -5,10 +5,18 @@
 */
 
 
-/*
-* 第一章 let和const命令
-*/
 
+
+
+
+
+
+
+
+
+/*
+* 第二章 let和const命令
+*/
 
 
 /* 1. let命令 */
@@ -349,8 +357,21 @@ var getGlobal = function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
-* 第二章 变量的解构赋值
+* 第三章 变量的解构赋值
 */
 
 
@@ -762,8 +783,16 @@ const { SourceMapConsumer, SourceNode } = require('source-map')
 
 
 
+
+
+
+
+
+
+
+
 /*
-* 第三章 字符串的扩展
+* 第四章 字符串的扩展
 */
 
 /* 1.字符的Unicode表示法 */
@@ -1058,8 +1087,19 @@ i18n`Welcome to &{siteName}, you are visitor nunber ${visitorNumber}!`
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 /*
-* 第四章 字符串的新增方法
+* 第五章 字符串的新增方法
 */
 
 
@@ -1207,25 +1247,55 @@ s.trimEnd() // ' abc'
 
 
 
+/*
+* 第六章 正则的扩展(略)
+*/
+
+/*
+* 第七章 数值的扩展
+*/
 
 
+/* 1.二进制和八进制表示法 */
+
+/* 2.Number.isFinite(), Number.isNaN */
+Number.isFinite(15); // true
+Number.isFinite(0.8); // true
+Number.isFinite(NaN); // false
+Number.isFinite(Infinity); // false
+Number.isFinite(-Infinity); // false
+Number.isFinite('foo'); // false
+Number.isFinite('15'); // false
+Number.isFinite(true); // false
+
+Number.isNaN(NaN) // true
+Number.isNaN(15) // false
+Number.isNaN('15') // false
+Number.isNaN(true) // false
+Number.isNaN(9/NaN) // true
+Number.isNaN('true' / 0) // true
+Number.isNaN('true' / 'true') // true
 
 
+isFinite(25) // true
+isFinite('25') // true
+Number.isFinite(25) // true
+Number.isFinite('25') // false
+
+isNaN(NaN) // true
+isNaN('NaN') // true
+Number.isNaN(NaN) // true
+Number.isNaN('NaN') // false
+Number.isNaN(1) // false
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* 1.二进制和八进制表示法 */
+/* 1.二进制和八进制表示法 */
+/* 1.二进制和八进制表示法 */
+/* 1.二进制和八进制表示法 */
+/* 1.二进制和八进制表示法 */
+/* 1.二进制和八进制表示法 */
+/* 1.二进制和八进制表示法 */
 
 
 
