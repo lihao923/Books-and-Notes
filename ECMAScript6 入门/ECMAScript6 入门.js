@@ -1289,15 +1289,138 @@ Number.isNaN('NaN') // false
 Number.isNaN(1) // false
 
 
-/* 1.二进制和八进制表示法 */
-/* 1.二进制和八进制表示法 */
-/* 1.二进制和八进制表示法 */
-/* 1.二进制和八进制表示法 */
-/* 1.二进制和八进制表示法 */
-/* 1.二进制和八进制表示法 */
-/* 1.二进制和八进制表示法 */
+/* 3.Number.parseInt(), Number.parseFloat() */
+// ES5的写法
+parseInt('12.34') // 12
+parseFloat('123.45#') // 123.45
+
+// ES6的写法
+Number.parseInt('12.34') // 12
+Number.parseFloat('123.45#') // 123.45
+
+Number.parseInt === parseInt // true
+Number.parseFloat === parseFloat // true
+
+/* 4.Number.isInteger() */
+Number.isInteger(25) // true
+Number.isInteger(25.1) // false
+
+Number.isInteger(25) // true
+Number.isInteger(25.0) // true
+
+Number.isInteger() // false
+Number.isInteger(null) // false
+Number.isInteger('15') // false
+Number.isInteger(true) // false
+
+Number.isInteger(3.0000000000000002) // true
+Number.isInteger(5E-324) // false
+Number.isInteger(5E-325) // true
+
+/* 5.Number.EPSILON */
+Number.EPSILON === Math.pow(2, -52) // true
+Number.EPSILON // 2.220446049250313e-16
+Number.EPSILON.toFixed(20) // "0.00000000000000022204"
+
+function withinErrorMargin(left, right) {
+	return Math.abs(left - right) < Number.EPSILON*Math.pow(2, 2);
+}
+
+0.1 +0.2 === 0.3 // false
+withinErrorMargin(0.1 + 0.2, 0.3) // true
+
+1.1 + 1.3 === 2.4 // false
+withinErrorMargin(1.1 + 1.3, 2.4) // true
+
+/* 6.安全数和Number.isSafeInteger() */
+
+Number.isSafeInteger('a') // false
+Number.isSafeInteger(null) // false
+Number.isSafeInteger(NaN) // false
+Number.isSafeInteger(Infinity) // false
+Number.isSafeInteger(-Infinity) // false
+
+Number.isSafeInteger(3) // true
+Number.isSafeInteger(1.2) // false
+Number.isSafeInteger(9007199254740990) // true
+Number.isSafeInteger(9007199254740992) // false
+
+Number.isSafeInteger(Number.MIN_SAFE_INTEGER - 1) // false
+Number.isSafeInteger(Number.MIN_SAFE_INTEGER) // true
+Number.isSafeInteger(Number.MAX_SAFE_INTEGER) // true
+Number.isSafeInteger(Number.MAX_SAFE_INTEGER + 1) // false
+
+Number.isSafeInteger = function(n) {
+	return (typeof n === 'number' &&
+		Math.round(n) === n &&
+		Number.MIN_SAFE_INTEGER < = N &&
+		n <= Number.MAX_SAFE_INTEGER);
+}
+
+function trusty(left, right, result) {
+	if(
+		Number.isSafeInteger(left) &&
+		Number.isSafeInteger(right) &&
+		Number.isSafeInteger(result)
+	) {
+		return result;
+	}
+	throw new RangeError('Operation cannot be trusted!')
+}
+
+trusty(9007199254740993, 990, 9007199254740993 - 990)
+// RangeError: Operation cannot be trusted!
+
+trusty(1, 2, 3) // 3
 
 
+/* 7.Math对象的扩展 */
+
+Math.trunc(4.1) // 4
+Math.trunc(4.9) // 4
+Math.trunc(-4.1) // -4
+Math.trunc(-4.9) // -4
+Math.trunc(-0.12345) // -0
+
+Math.trunc('123.45') // 123
+Math.trunc(true) // 1
+Math.trunc(false) // 0
+Math.trunc(null) // 0
+
+Math.trunc(NaN) // NaN
+Math.trunc('foo') // NaN
+Math.trunc() // NaN
+Math.trunc(undefined) // NaN
+
+Math.trunc = Math.trunc || function(x) {
+	return x < 0 ? Math.ceil(x) : Math.floor(x);
+}
+
+
+Math.sign(-5) // -1
+Math.sign(5) // +1
+Math.sign(0) // +0
+Math.sign(-0) // -0
+Math.sign(NaN) // NaN
+
+Math.sign('') // 0
+Math.sign(true) // +1
+Math.sign(false) // 0
+Math.sign(null)  // 0
+Math.sign('9') // +1
+Math.sign('foo') // NaN
+Math.sign() // NaN
+Math.sign(undefined) // NaN
+
+Math.sign = Math.sin || function(x) {
+	x = +x; // convert to a number
+	if(x === 0 || isNaN(X)) {
+		return x;
+	}
+	return x > 0 ? 1 : -1;
+};
+
+...
 
 
 
