@@ -1436,11 +1436,227 @@ Math.sign = Math.sin || function(x) {
 
 
 
+/*
+* 第八章 函数的扩展
+*/
+
+
+/* 1.函数参数的默认值 */
+function log(x, y) {
+	y = y || 'World';
+	console.log(x, y);
+}
+log('Hello') // Hello World
+log('Hello', 'China') // Hello China
+log('Hello', '') // Hello World
+
+if(typeof y === 'undefined') {
+	y = 'World';
+}
+
+function log(x, y = 'World') {
+	console.log(x, y);
+}
+log('Hello') // Hello World
+log('Hello', 'China') // Hello China
+log('Hello', '') // Hello
+
+function Point(x = 0, y = 0) {
+	this.x = x;
+	this.y = y;
+}
+const p = new Point();
+p // {x: 0, y: 0}
+
+function foo(x = 5) {
+	let x = 1; // error
+	const x = 2; // error
+}
+
+// 不报错
+function foo(x, x, y) {
+	// ...
+}
+
+// 报错
+function foo(x, x, y) {
+	// ...
+}
+// SyntaxError: Duplicate parameter name not allowed in this context
+
+
+
+let x = 99;
+function foo(p = x + 1) {
+	console.log(p);
+}
+foo() // 100
+
+x = 100;
+foo() // 101
+
+function foo(x, y = 5) {
+	console.log(x, y);
+}
+
+foo({}) // undefined 5
+foo({x: 1}) // 1 5
+foo({x: 1, y: 2}) // 1 2
+foo() // TypeError: Cannot read property 'x' of undefined
+
+function foo({x, y = 5} = {}) {
+	console.log(x, y);
+}
+
+foo() // undefined 5
+
+function fetch(url, { body = '', method = 'GET', headers = {} }) {
+	console.log(method);
+}
+
+fetch('http://example.com', {})
+// GET
+
+fetch('http://example.com')
+// 报错
+
+function fetch(url, { body = '', method = 'GET', headers = {} } = {}) {
+	console.log(method);
+}
+fetch('http://example.com')
+// 'GET'
+
+// 写法一
+function m1({x = 0, y = 0} = {}) {
+	return [x, y]
+}
+// 写法二
+function m2({x, y} = {x: 0, y: 0}) {
+	return [x, y];
+}
+
+
+// 函数没有参数的情况
+m1() // [0, 0]
+m2() // [0, 0]
+
+// x和y都有值的情况
+m1({x:3, y:8}) // [3, 8]
+m2({x:3, y:8}) // [3, 8]
+
+// x有值，y无值的情况
+m1({x:3}) // [3, 0]
+m2({x:3}) // [3, undefined]
+
+// x和y都无值的情况
+m1({}) // [0, 0]
+m2({}) // [undefined, undefined]
+
+m1({z:3}) // [0, 0]
+m2({z:3}) // [undefined, undefined]
+
+
+// 例一
+function f(x = 1, y) {
+	return [x, y];
+}
+f() // [1, undefined]
+f(2) // [2, undefined]
+f(, 1) // 报错
+f(undefined, 1) // [1, 1]
+
+// 例二
+function f(x, y = 5, z) {
+	return[x, y, z];
+}
+f() // [undefined, 5, undefined]
+f(1) // [1, 5, undefined]
+f(1, , 2) // 报错
+f(1, undefined, 2) // [1, 5, 2]
+
+
+function foo(x = 5, y = 6) {
+	console.log(x, y);
+}
+foo(undefined, null) // 5 null
+
+
+(function(a) {}).length // 1
+(function(a = 5) {}).length // 0
+(function(a, b, c = 5)).length
+
+(function(...args) {}).length // 0
+(function(a = 0, b, c) {}).length // 0
+(function(a, b = 1, c) {}).length // 1
+
+var x = 1;
+function f(x, y = x) {
+	console.log(y);
+}
+f(2) // 2
+
+let x = 1;
+function f(y = x) {
+	let x = 2;
+	console.log(y);
+}
+f() // 1
+
+function f(y = x) {
+	let x = 2;
+	console.log(y);
+}
+f() // ReferenceError: x is not defined
+
+var x = 1;
+function foo(x = x) {
+	// ...
+}
+foo() // ReferenceError: x is not defined
+
+let foo = 'outer';
+function bar(func = () => foo) {
+	let foo = 'inner';
+	console.log(func());
+}
+
+bar(); // outer
+
+function bar(func = () => foo) {
+	let foo = 'inner';
+	console.log(func());
+}
+bar() // ReferenceError: foo is not defined
+
+var x = 1;
+function foo(x, y = function() {x = 2;}) {
+	var x = 3;
+	y();
+	console.log(x);
+}
+foo() // 3
+x // 1
+
+
+var x = 1;
+function foo(x, y = function() {x = 2; }) {
+	x = 3;
+	y();
+	console.log(x);
+}
+foo() // 2
+x // 1
 
 
 
 
-
+/* 1.函数参数的默认值 */
+/* 1.函数参数的默认值 */
+/* 1.函数参数的默认值 */
+/* 1.函数参数的默认值 */
+/* 1.函数参数的默认值 */
+/* 1.函数参数的默认值 */
+/* 1.函数参数的默认值 */
 
 
 
