@@ -1648,17 +1648,575 @@ foo() // 2
 x // 1
 
 
+function throwIfMissing() {
+	throw new Error('Missing parameter');
+}
+
+function foo(mustBeProvided = throwIfMissing()) {
+	return mustBeProvided;
+}
+
+foo() // Error: Missing parameter
+
+function foo(optional = undefined) { // ... }
 
 
-/* 1.函数参数的默认值 */
-/* 1.函数参数的默认值 */
-/* 1.函数参数的默认值 */
-/* 1.函数参数的默认值 */
-/* 1.函数参数的默认值 */
-/* 1.函数参数的默认值 */
-/* 1.函数参数的默认值 */
+
+/* 2.rest参数 */
+function add(...values) {
+	let sum = 0;
+	for(var val of values) {
+		sum += val;
+	}
+	return sum;
+}
+
+add(2, 5, 3) // 10
 
 
+
+
+// arguments变量的写法
+function sortNumbers() {
+	return Array.prototype.slice.call(arguments).sort();
+}
+// rest参数的写法
+const sortNumbers = (...numbers) => numbers.sort();
+
+
+
+
+function push(array, ...items) {
+	items.forEach(function(item) {
+		array.push(item);
+		console.log(item);
+	});
+}
+var a = [];
+push(a, 1, 2, 3)
+
+
+
+// 报错
+function f(a, ...b, c) {
+	// ...
+}
+
+
+
+(function(a) {}).length // 1
+(function(...a) {}).length // 0
+(function(a, ...b) {}).length // 1
+
+
+
+/* 3.严格模式 */
+function doSomething(a, b) {
+	'use strict';
+	// code
+}
+
+// 报错
+function doSomething(a, b = a) {
+	'use strict';
+	// code
+}
+
+// 报错
+const doSomething = function({a, b}) {
+	'use strict';
+	// code
+}
+
+// 报错
+const doSomething = (...a) => {
+	'use strict';
+	// code
+}
+
+const obj = {
+	// 报错
+	doSomething({a, b}) {
+		'use strict';
+		// code
+	}
+};
+
+
+// 报错
+function doSomething(value = 070) {
+	'use strict';
+	return value;
+}
+
+
+'use strict';
+function doSomething(a, b = a) {
+	// code
+}
+
+const doSomething = (function () {
+	'use strict';
+	return function(value = 42) {
+		return value;
+	};
+}());
+
+
+
+/* 4.name属性 */
+
+function foo() {}
+foo.name // 'foo'
+
+
+
+var f = function() {};
+// ES5
+f.name // ''
+
+// ES6
+f.name // 'f'
+
+
+
+
+var bar = function baz() {};
+// ES5
+bar.name // 'baz'
+
+// ES6
+bar.name // 'baz'
+
+
+(new Function).name // 'anonymous'
+
+
+function foo() {};
+foo.bind({}).name // 'bound foo'
+(function {}).bind({}).name // 'bound'
+
+
+
+/* 5.箭头函数 */
+
+var f = v => v;
+// 等同于
+var f = function(v) {
+	return v
+}
+
+
+var f = () => 5;
+// 等同于
+var f = function() {
+	return 5;
+}
+
+var sum = (num1, num2) => num1 + num2;
+// 等同于
+var sum = function(num1, num2) {
+	return num1 + num2;
+}
+
+var sum = (num1, num2) => {
+	return num1 + num2
+}
+
+
+// 报错
+let getTempItem = id => {id: id, name: 'Temp'};
+
+// 不报错
+let getTempItem = id => ({id: id, name: 'Temp'});
+
+
+let fn = () => void doesNotReturn();
+
+
+const full = ({first, last}) => first + '' + last;
+// 等同于
+function full(person) {
+	return person.first + '' + person.last
+}
+
+
+// 正常函数写法
+[1, 2, 3].map(function(x) {
+	return x * x;
+});
+// 箭头函数写法
+[1, 2, 3].map(x => x * x);
+
+
+// 正常函数写法
+var result = values.sort(function(a, b) {
+	return a - b;
+});
+// 箭头函数写法
+var result = values.sort((a, b) => a - b );
+
+
+const numbers = (...nums) => nums;
+numbers.(1, 2, 3, 4, 5) // [1, 2, 3, 4, 5]
+
+const headAndTail = (head, ...tail) => [head, tail];
+headAndTail(1, 2, 3, 4, 5) // [1, [2, 3, 4, 5]]
+
+
+
+function foo() {
+	setTimeout(() => {
+		console.log('id: ', this.id)
+	}, 100);
+}
+var id = 21;
+foo.call({id: 42}); // id: 42
+
+
+
+function Timer() {
+	this.s1 = 0;
+	this.s2 = 0;
+
+	//箭头函数
+	setInterval(() => this.s1++, 1000);
+
+	//普通函数
+	setInterval(function() {
+		this.s2++;
+	}, 1000);
+}
+var timer = new Timer();
+setTimeout(() => console.log('s1:', timer.s1), 3100);
+setTimeout(() => console.log('s2:', timer.s2), 3100);
+// s1: 0
+// s2: 0
+
+
+var handler = {
+	id:'12345',
+	init: function() {
+		document.addEventListener('click', event => this.doSomething(event.type), false);
+	},
+
+	doSomething: function(type) {
+		console.log('Handling ' + type + ' for ' + this.id);
+	}
+};
+
+
+
+// ES6
+function foo() {
+	setTimeout(() => {
+		console.log('id:', this.id);
+	}, 100);
+}
+
+// ES5
+function foo() {
+	var _this = this;
+	setTimeout(function() {
+		console.log('id:', _this.id);
+	}, 100)
+}
+
+
+
+function foo() {
+	return () => {
+		return () => {
+			return () => {
+				console.log('id:', this.id);
+			}
+		}
+	}
+}
+
+var f = foo.call({id: 1});
+
+var t1 = f.call({id: 2})()(); // id: 1
+var t2 = f().call({id: 3})(); // id: 1
+var t3 = f()().call({id: 4}); // id: 1
+
+
+
+function foo() {
+	setTimeout(() => {
+		console.log('args:', arguments);
+	}, 100);
+}
+foo(2, 4, 6, 8)
+// args: [2, 4, 6, 8]
+
+
+(function() {
+	return [
+		(() => this.x).bind({x: 'inner'})()
+	];
+}).call({x: 'outer'});
+// ['outer']
+
+
+
+
+/* 6.尾调用优化 */
+
+function f(x) {
+	return g(x)
+}
+
+// 情况一
+function f(x) {
+	let y = g(x);
+	return y;
+}
+// 情况二
+function f(x) {
+	return g(x) + 1;
+}
+// 情况三
+function f(x) {
+	g(x);
+}
+
+function f(x) {
+	g(x);
+	return undefined;
+}
+
+function f(x) {
+	if(x > 0) {
+		return m(x)
+	}
+	return n(x);
+}
+
+
+function f() {
+	let m = 1;
+	let n = 2;
+	return (m + n);
+}
+f();
+// 等同于
+function f() {
+	return g(3);
+}
+f();
+
+// 等同于
+g(3);
+
+
+function addOne(a) {
+	var one = 1;
+	function inner(b) {
+		return b + one;
+	}
+	return inner(a)
+}
+
+
+// 尾递归
+function factorial(a) {
+	if(n === 1) {
+		return 1;
+	}
+	return n * factorial(n - 1);
+}
+factorial(5) // 120
+
+
+function factorial(n, total) {
+	if(n === 1) {
+		return total;
+	}
+
+	return factorial(n - 1, n * total);
+}
+factorial(5, 1) // 120
+
+
+// 非尾递归
+function Fibonacci(n) {
+	if( n <= 1) {
+		return 1;
+	}
+	return Fibonacci(n - 1) + Fibonacci(n - 2)
+}
+
+Fibonacci(10) // 89
+Fibonacci(100) // 超时
+Fibonacci(500) // 超时
+
+// 尾递归
+function Fibonacci2(n, ac1 = 1, ac2 = 1) {
+	if(n <= 1) {
+		return ac2;
+	}
+
+	return Fibonacci2(n - 1, ac2, ac1 + ac2);
+}
+Fibonacci2(100) // 573147844013817200000
+Fibonacci2(1000) // 7.0330367711422765e+208
+Fibonacci2(10000) // Infinity
+
+
+
+function tailFactorial(n, total) {
+	if(n === 1) {
+		return total;
+	}
+
+	return tailFactorial(n - 1, n * total);
+}
+
+function factorial(n) {
+	return tailFactorial(n, 1);
+}
+
+factorial(5) // 120
+
+
+
+function currying(fn, n) {
+	return function(m) {
+		return fn.call(this, m, n);
+	};
+}
+
+function tailFactorial(n, total) {
+	if(n === 1) {
+		return total
+	}
+	return tailFactorial(n - 1, n * total);
+}
+
+const factorial = currying(tailFactorail, 1);
+factorial(5) // 120
+
+
+
+function factorial(n, total = 1) {
+	if(n === 1) {
+		return total;
+	}
+
+	return factorial(n - 1, n * total);
+}
+factorial(5) // 120
+
+
+function restricted() {
+	'use strict';
+	restricted.caller; //报错
+	restricted.arguments; // 报错
+}
+restricted()
+
+
+function sum(x, y) {
+	if(y > 0) {
+		return sum(x + 1, y - 1);
+	} else {
+		return x;
+	}
+}
+sum(1, 10000)
+// Uncaught RangeError: Maximum call stack size exceeded(…)
+
+// 蹦床函数
+function trampoline(f) {
+	while (f && f instanceof Function) {
+		f = f();
+	}
+	return f;
+}
+
+function sum(x, y) {
+	if(y > 0) {
+		return sum.bind(null, x + 1, y - 1);
+	} else {
+		return x;
+	}
+}
+
+trampoline(sum(1, 100000)) // 100001
+
+
+
+function tco(f) {
+	var value;
+	var active = false;
+	var accumulated = [];
+
+	return function accumulator() {
+		accumulated.push(arguments);
+		if(!active) {
+			active = true;
+			while(accumulated.length) {
+				value = f.apply(this, accumulated.shift());
+			}
+			active = false;
+			return value;
+		}
+	};
+}
+
+var sum = tco(function(x, y) {
+	if(y > 0) {
+		return sum(x + 1, y - 1) 
+	} else {
+		return x;
+	}
+});
+
+sum(1, 100000)
+// 100001
+
+
+/* 7.函数参数的尾逗号 */
+function clownsEverywhere(param1, param2) {
+	//... 
+}
+clownsEverywhere('foo', 'bar');
+
+// ES2017
+function clownsEverywhere(param1, param2,) {
+	//... 
+}
+clownsEverywhere('foo', 'bar',);
+
+
+
+/* 8.Function.prototype.toString() */
+
+function /* foo comment */ foo() {}
+foo.toString()
+// function foo() {}
+
+// ES2019
+function /* foo comment */ foo() {}
+foo.toString()
+// 'function /* foo comment */ foo() {}'
+
+
+
+/* 9.catch命令的参数省略 */
+try {
+	// ...
+} catch(err) {
+	// 处理错误
+}
+
+// ES2019
+try {
+	// ...
+} catch {
+	// ...
+}
 
 
 
