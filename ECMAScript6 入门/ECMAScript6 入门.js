@@ -2567,17 +2567,51 @@ function ArrayOf() {
 
 
 /* 4.数组事例的copyWithin() */
+Array.prototype.copyWithin(target, start = 0, end = this.length);
+
+[1, 2, 3, 4, 5].copyWithin(0, 3)
+// [4, 5, 3, 4, 5]
+
+[1, 2, 3, 4, 5].copyWithin(0, 3, 4)
+// [4, 2, 3, 4, 5]
+
+[1, 2, 3, 4, 5].copyWithin(0, -2, -1)
+// [4, 2, 3, 4, 5]
+
+[].copyWithin.call({length: 5, 3:1}, 0, 3)
+// {0: 1, 3: 1, length: 5}
 
 
-
-
-
-
+[].copyWithin.call(new Int32Array([1, 2, 3, 4, 5]), 0, 3, 4);
+// Int32Array [4, 2, 3, 4, 5]
 
 
 
 
 /* 5.数组事例的find()和findIndex() */
+[1, 4, -5, 10].find((n) => n < 0)
+// -5
+
+[1, 5, 10, 15].find(function(value, index, arr) {
+	return value > 9
+})
+// 10
+
+[1, 5, 10, 11].findIndex(function(value, index, arr) {
+	return value > 9
+})
+// 2
+
+function f(v) {
+	return v > this.age
+}
+let person = {name: 'John', age: 20}
+[10, 12, 26, 15].find(f, person); // 26
+
+[NaN].indexOf(NaN) // -1
+[NaN].findIndex( y => Object.is(NaN, y)) // 0
+
+
 /* 6.数组事例的fill() */
 /* 7.数组事例的entries(), keys()和values() */
 /* 8.数组事例的includes() */
