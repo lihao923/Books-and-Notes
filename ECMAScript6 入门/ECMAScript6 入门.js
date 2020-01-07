@@ -2566,7 +2566,7 @@ function ArrayOf() {
 }
 
 
-/* 4.数组事例的copyWithin() */
+/* 4.数组实例的copyWithin() */
 Array.prototype.copyWithin(target, start = 0, end = this.length);
 
 [1, 2, 3, 4, 5].copyWithin(0, 3)
@@ -2588,7 +2588,7 @@ Array.prototype.copyWithin(target, start = 0, end = this.length);
 
 
 
-/* 5.数组事例的find()和findIndex() */
+/* 5.数组实例的find()和findIndex() */
 [1, 4, -5, 10].find((n) => n < 0)
 // -5
 
@@ -2612,16 +2612,668 @@ let person = {name: 'John', age: 20}
 [NaN].findIndex( y => Object.is(NaN, y)) // 0
 
 
-/* 6.数组事例的fill() */
-/* 7.数组事例的entries(), keys()和values() */
-/* 8.数组事例的includes() */
-/* 9.数组事例的flat(), flatMap() */
+/* 6.数组实例的fill() */
+
+['a', 'b', 'c'].fill(7)
+// [7, 7, 7]
+
+new Array(3).fill(7)
+// [7, 7, 7]
+
+['a', 'b', 'c'].fill(7, 1, 2)
+// ['a', 7, 'c']
+
+let arr = new Array(3).fill({name: 'Mike'});
+arr[0].name = 'Ben';
+arr
+// [{name: 'Ben'}, {name: 'Ben'}, {name: 'Ben'}]
+
+let arr = new Array(3).fill([]);
+arr[0].push(5)
+// [[5], [5], [5]]
+
+
+
+/* 7.数组实例的entries(), keys()和values() */
+for(let index of ['a', 'b'].keys()) {
+	console.log(index);
+}
+// 0
+// 1
+
+for(let elem of ['a', 'b'].values()) {
+	console.log(elem);
+}
+// 'a'
+// 'b'
+
+for(let [index, elem] of ['a', 'b'].entries()) {
+	console.log(index, elem);
+}
+// 0 'a'
+// 1 'b'
+
+
+let letter = ['a', 'b', 'c'];
+let entries = letter.entries()
+console.log(entries.next().value); // [0, 'a']
+console.log(entries.next().value); // [1, 'b']
+console.log(entries.next().value); // [2, 'c']
+
+
+
+/* 8.数组实例的includes() */
+[1, 2, 3].includes(2) // true
+[1, 2, 3].includes(4) // false
+[1, 2, NaN].includes(NaN) // true
+
+
+[1, 2, 3].includes(3, 3) // false
+[1, 2, 3].includes(3, -1) // true
+
+
+if(arr.indexOf(el) !== -1) {
+	// ...
+}
+
+[NaN].indexOf(NaN) // -1
+[NaN].includes(NaN) // true
+
+
+const contains = (() =>
+	Array.prototype.includes 
+	? (arr, value) => arr.includes(value)
+	: (arr, value) => arr.some(el => el === value)
+)();
+contains(['foo', 'bar'], 'baz'); // => false
+
+
+/* 9.数组实例的flat(), flatMap() */
+[1, 2, [3, 4]].flat()
+// [1, 2, 3, 4]
+
+[1, 2, [3, [4, 5]]].flat()
+// [1, 2, 3, [4, 5]]
+
+[1, 2, [3, [4, 5]]].flat(2)
+// [1, 2, 3, 4, 5]
+
+[1, [2, [3]]].flat(Infinity)
+// [1, 2, 3]
+
+[1, 2, 3, 4, 5].flat()
+// [1, 2, 4, 5]
+
+
+
+// 相当于 [[2, 4], [3, 6], [4, 8]].flat()
+[2, 3, 4].flatMap((x) => [x, x * 2])
+// [2, 4, 3, 6, 4, 8]
+
+
+// 相当于 [[[2]], [[4]], [[6]], [[8]]].flat()
+[1, 2, 3, 4].flatMap(x => [[x * 2]])
+// [[2], [4], [6], [8]]
+
+arr.flatMap(function callback(currentValu[, index[, array]])) {
+	// ...
+}[, thisArg]
+
+
 /* 10.数组的空位 */
+Array(3) // [, , ,]
+
+0 in [undefined, undefined, undefined] // true
+0 in [, , ,] // false
+
+// forEach方法
+[, 'a'].forEach((x, i) => console.log(i)); // 1
+
+// filter方法
+['a', , 'b'].filter(x => true) // ['a', 'b']
+
+// every
+[, 'a'].every(x => x === 'a') // true
+
+// reduce
+[1, , 2].reduce((x, y) => x + y) // 3
+
+// some
+[, 'a'].some(x => x !== 'a') // false
+
+// map
+[, 'a'].map(x => 1) // [, 1]
+
+// join
+[, 'a', undefined, null].join('#') // '#a##'
+
+// toString
+[, 'a', undefined, null].toString() // ',a,,'
+
+
+Array.from(['a', , 'b'])
+// ['a', undefined, 'b']
+
+[,'a','b',,].copyWithin(2, 0) // [,'a',,'a']
+
+new Array(3).fill('a') // ['a', 'a', 'a']
+
+let arr = [, ,];
+for(let i of arr) {
+	console.log(1);
+}
+// 1
+// 1
+
+// entries()
+[...[, 'a'].entries()] // [[0, undefined], [1, 'a']]
+
+// keys()
+[...[, 'a'].keys()] // [0, 1]
+
+// values()
+[...[, 'a'].values()] // [undefined, 'a']
+
+// find()
+[, 'a'].find(x => true) // undefined
+
+// findIndex()
+[, a].findIndex(x => true) // 0
+
+
 /* 11.Array.prototype.sort()的排序稳定性 */
+const arr = ['peach', 'straw', 'apple', 'spork'];
+const stableSorting = (s1, s2) => {
+	if(s1[0] < s2[0]) {
+		return -1;
+	}
+	return 1;
+};
+
+arr.sort(stableSorting)
+// ['apple', 'peach', 'straw', 'spork']
+
+const unstableSorting = (s1, s2) => {
+	if(s1[0] <= s2[0]) {
+		return -1;
+	}
+	return 1
+};
+arr.sort(unstableSorting)
+// ['apple', 'peach', 'spork', 'straw']
 
 
 
 
+
+
+
+
+
+
+/*
+* 第十章 对象的扩展
+*/
+
+
+/* 1.属性的简洁表示法 */
+const foo = 'bar'；
+cosnt baz = {foo};
+baz // {foo: 'bar'}
+
+// 等同于
+const baz = {foo: foo}
+
+
+function f(x, y) {
+	return {x, y};
+}
+// 等同于
+function f(x, y) {
+	return {x: x, y: y};
+}
+f(1, 2) // Object {x: 1, y: 2}
+
+
+
+cosnt o = {
+	method() {
+		return 'Hello!';
+	}
+}
+// 等同于
+const o = {
+	method: function() {
+		return 'Hello!'
+	}
+}
+
+
+let birth = '2000/01/01';
+const Person = {
+	name: '张三',
+	// 等同于birth: birth
+	birth,
+	// 等同于hello: function() ...
+	hello() {
+		console.log('我的名字是',this.name);
+	}
+}
+
+
+function getPoint() {
+	const x = 1;
+	const y = 10;
+	return {x, y};
+}
+getPoint() // {x: 1, y: 10}
+
+
+
+let ms = {}
+function getItem(key) {
+	return key in ms ? ms[key]: null;
+}
+function setItem(key, value) {
+	ms[key] = value;
+}
+function clear() {
+	ms = {};
+}
+
+module.exports = {getItem, setItem, clear};
+// 等同于
+module.exports = {
+	getItem: getItem,
+	setItem: setItem,
+	clear: clear
+}
+
+
+const cart = {
+	_wheels: 4,
+	
+	get wheels() {
+		return this._wheels;
+	},
+	
+	set wheels(value) {
+		if(value < this._wheels) {
+			throw new Error('数值太小了！');
+		}
+		this._wheels = value;
+	}
+}
+                                                                         
+
+let user = {
+	name: 'test'
+};
+let foo = {
+	bar: 'baz'
+};
+console.log(user, foo);
+// {name: 'test'} {bar: 'baz'}
+console.log({user, foo});
+// {user: {name: 'test'}, foo: {bar: 'baz'}}
+
+
+const obj = {
+	f() {
+		this.foo = 'bar';
+	}
+};
+new obj.f() // 报错
+
+
+
+/* 2.属性名表达式 */
+
+// 方法一
+obj.foo = true;
+// 方法二
+obj['a' + 'bc'] = 123;
+
+
+
+let propKey = 'foo'
+let obj = {
+	[propKey]: true,
+	['a' + 'bc']: 123
+}
+
+
+let lastWord = 'last word'
+const a = {
+	'first word': 'hello',
+	[lastWord]: 'world'
+};
+a['first word'] // 'hello'
+a[lastWord] // 'word'
+a['last word'] // 'word'
+
+
+let obj = {
+	['h' + 'ello']() {
+		return 'hi'
+	}
+}
+obj.hello() // hi
+
+
+// 报错
+const foo = 'bar';
+const bar = 'abc';
+const baz = {[foo]};
+
+// 正确
+const foo = 'bar';
+const baz = {[foo]: 'abc'}
+
+
+const keyA = {a: 1};
+const keyB = {b: 2};
+
+const myObject = {
+	[keyA]: 'valueA',
+	[keyB]: 'valueB'
+};
+myObject // Object {[object Object]: 'valueB'}
+
+
+
+/* 3.方法的name属性 */
+
+const person = {
+	sayName() {
+		console.log('hello!')
+	}
+}
+
+person.sayName.name // 'sayName'
+
+const obj = {
+	get foo() {},
+	set foo(x) {}
+};
+obj.foo.name // TypeError: Cannot read property 'name' of undefined
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'foo');
+descriptor.get.name // 'get foo'
+descriptor.set.name // 'set foo'
+
+
+(new Function()).name // 'anonymous'
+var doSomething = function() {
+	// ...
+};
+doSomething.bind().name // 'bound doSomething'
+
+
+const key1 = Symbol('description')
+const key2 = Symbol();
+let obj = {
+	[key1]() {},
+	[key2]() {},
+};
+obj[key1].name // '[description]'
+obj[key2].name // ''
+
+
+
+
+/* 4.属性的可枚举性和遍历 */
+
+let obj = {foo: 123}
+Object.getOwnPropertyDescriptor(obj, 'foo')
+// {
+// 	value: 123,
+// 	writable: true,
+// 	enumerable: true,
+// 	configurable: true
+// }
+
+
+Object.getOwnPropertyDescriptor(Object.prototype, 'toString').enumerable
+// false
+Object.getOwnPropertyDescriptor(Object.prototype, 'length').enumerable
+// false
+
+Object.getOwnPropertyDescriptor(class {foo() {}}.prototype, 'foo').enumerable
+// false
+
+
+Reflect.ownKeys({[Symbol()]: 0, b: 0, 10: 0, 2: 0, a: 0})
+// ['2', '10', 'b', 'a', Symbol()]
+
+
+
+/* 5.super关键字 */
+
+const proto = {
+	foo: 'hello'
+};
+const obj = {
+	foo: 'world',
+	find() {
+		return super.foo;
+	}
+};
+
+Object.setPrototypeOf(obj, proto);
+obj.find() // 'hello'
+
+
+// 报错
+const obj = {
+	foo: super.foo
+}
+// 报错
+const obj = {
+	foo: () => super.foo
+}
+// 报错
+const obj = {
+	foo: function() {
+		return super.foo
+	}
+}
+
+
+
+const proto = {
+	x: 'hello',
+	foo() {
+		console.log(this.x)
+	},
+};
+
+const obj = {
+	x: 'world',
+	foo() {
+		super.foo();
+	}
+}
+
+Object.setPrototypeOf(obj, proto);
+obj.foo() // 'world'
+
+
+
+/* 6.对象的扩展运算符 */
+
+let {x, y, ...z} = {x: 1, y: 2, a: 3, b: 4};
+x // 1
+y // 2
+z // {a: 3, b: 4}
+
+
+let {...z} = null; // 运行时错误
+let {...z} = undefined; // 运行时错误
+
+
+let {...x, y, z} = someObject; // 句法错误
+let {x, ...y, ...z} = someObject // 句法错误
+
+
+let obj = {a: {b: 1}};
+let {...x} = obj;
+obj.a.b = 2;
+x.a.b // 2
+
+
+let o1 = {a: 1};
+let o2 = {b: 2};
+o2.__proto__ = o1;
+let {...o3} = o2;
+o3 // {b: 2}
+o3.a // undefined
+
+
+const o = Object.create({x: 1, y: 2});
+o.z = 3;
+let {x, ...newObj} = o;
+let {y, z} = newObj;
+x // 1
+y // undefined
+z // 3
+
+let {x, ...{y, z}} = o;
+// SyntaxError: ... must be followed by an identifier in declaration contexts
+
+
+function baseFunction({a, b}) {
+	// ...
+}
+function wrapperFunction({x, y, ..restCofig}) {
+	// 使用 x 和 y 参数进行操作
+	// 其余参数传给原始函数
+	return baseFunction(restConfig);
+}
+
+
+
+let z = {a: 3, b: 4};
+let n = {...z};
+n // {a: 3, b: 4}
+
+let foo = {...['a', 'b', 'c']};
+foo // {0: 'a', 1: 'b', 2: 'c'}
+
+{...{}, a: 1} // {a: 1}
+
+// 等同于{...Object(1)}
+{...1} // {}
+// 等同于 {...Object(true)}
+{...true} // {}
+// 等同于 {...Object(undefined)}
+{...undefined} // {}
+// 等同于 {...Object(null)}
+{...null} // {}
+
+{...'hello'}
+// {0: 'h', 1: 'e', 2: 'l', 3: 'l', 4: 'o'}
+
+let aClone = {...a};
+// 等同于
+let aClone = Object.assign({}, a);
+
+
+// 写法一
+const clone1 = {
+	__proto__: Object.getPrototypeOf(obj),
+	...obj
+};
+// 写法二
+const clone2 = Object.assign(
+	Object.create(Object.getPrototypeOf(obj)),
+	obj
+);
+// 写法三
+const clone3 = Object.create(
+	Object.getPrototypeOf(obj),
+	Object.getOwnPropertyDescriptor(obj)
+)
+
+
+
+let ab = {...a, ...b};
+// 等同于
+let ab = Object.assign({}, a, b);
+
+
+
+
+let aWithOverrides = {...a, x: 1, y: 2};
+// 等同于
+let aWidthOverrides = {...a, ...{x: 1, y: 2}};
+// 等同于
+let x = 1, y = 2, aWithOverrides = {...a, x, y};
+// 等同于
+let aWithOverrides = Object.assign({}, a, {x:1, y: 2});
+
+
+let newVersion = {
+	...previousVersion,
+	name: 'New Name' // Override the name property
+}
+
+let aWithDefaults = {x: 1, y: 2, ...a};
+// 等同于
+let aWithDefaults = Object.assign({}, {x: 1, y: 2}, a);
+// 等同于
+let aWithDefaults = Object.assign({x: 1, y: 2}, a);
+
+const obj = {
+	...(x > 1 ? {a: 1} : {}),
+	b: 2,
+}
+
+
+// 并不会抛出错误，因为 x 属性只是被定义，但没执行
+let aWithXGetter = {
+	...a,
+	get x() {
+		throw new Error('not throw yet');
+	}
+};
+
+// 会抛出错误，因为 x 属性被执行了
+let runtimeError = {
+	...a,
+	...{
+		get x() {
+			throw new Error('throw now!');
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 7.链判断运算符 */
+/* 8.Null判断运算符 */
 
 
 
