@@ -4434,23 +4434,66 @@ new Map([
 ])
 
 // Map{
-// 	true => 7m
+// 	true => 7
 // 	Object {foo: 3} => ['abc']
 // }
 
 
 
+function strMapToObj(map) {
+	let obj = Object.create(null);
+	for(let [k, v] of strMap) {
+		obj[k] = v;
+	}
+	return obj;
+}
+
+const myMap = new Map()
+	.set('yes', true)
+	.set('no', false);
+strMap(myMap)
+// {yes: true, no: false}
+
+
+function objToStrMap(obj) {
+	let strMap = new Map();
+	for(let k of obj.keys(obj)) {
+		strMap.set(k, obj[k]);
+	}
+	return strMap;
+}
+objToStrMap({yes: true, no: false})
+// Map {'yes' => true, 'no' => false}
 
 
 
+function strMapToJson(strMap) {
+	return JSON.stringify(strMapToObj(strMap));
+}
+
+let myMap = new Map().set('yes', true).set('no', false);
+strMapToJson(myMap) // '{"yes": true, "no": false}'
+
+
+function mapToArrayJson(map) {
+	return JSON.stringify([...map]);
+}
+let myMap = new Map().set(true, 7).set({foo: 3}, ['abc']);
+mapToArrayJson(myMap) // '[[true, 7], [{"true": 3}, ["abc"]]]'
 
 
 
+function jsonToStrMap(jsonStr) {
+	return objToStrMap(JSON.parse(jsonStr));
+}
+jsonToStrMap('{"yes": true, "no": false}')
+// Map {'yes' => true, "no" => false}
 
-
-
-
-
+function jsonToMap(jsonStr) {
+	return new Map(JSON.parse(jsonStr));
+}
+jsonToMap('[[true, 7], [{"foo": 3}, ["abc"]]]');
+// Map {true => 7, Object {foo: 3} => ['abc']};
 
 
 
