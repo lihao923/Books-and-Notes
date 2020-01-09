@@ -3933,6 +3933,558 @@ Object.fromEntries(new URLSearchParams('foo=bar$baz=qux'))
 
 
 
+/*
+* 第十三章 Set和Map数据结构
+*/
+
+/* 1.Set */
+const s = new Set();
+[2,3,4,5,2,2].forEach(x => s.add(x))
+
+for(let i of s) {
+	console.log(i);
+}
+// 2 3 5 4
+
+
+
+
+// 例一
+const set = new Set([1, 2, 3, 4, 4]);
+[...set]
+// [1, 2, 3, 4]
+
+// 例二
+const items = new Set([1, 2, 3, 4, 5, 5, 5, 5]);
+items.size // 5
+
+// 例三
+const set = new Set(document.querySelectorAll('div'));
+set.size // 56
+// 类似于
+const set = new Set();
+document.querySelectorAll('div').forEach(div => set.add(div));
+set.size // 56
+
+
+
+// 去除数组的重复成员
+[...new Set(array)]
+
+[...new Set('ababbc')].join('') // 'abc'
+
+
+
+let set = new Set();
+let a = NaN;
+let b = NaN;
+set.add(a);
+set.add(b);
+set // Set{NaN}
+
+
+
+
+let set = new Set();
+set.add({});
+set.size // 1
+
+set.add({});
+set.size // 2
+
+
+
+s.add(1).add(2).add(2);
+s.size // 2
+
+s.has(1) // true
+s.has(2) // true
+s.has(3) // false
+
+s.delete(2);
+s.has(2) // false
+
+
+
+// 对象的写法
+const properties = {
+	'width': 1,
+	'height': 1
+};
+if(properties[someName]) {
+	// do something
+}
+
+// Set的写法
+const properties = new Set();
+properties.add('width');
+properties.add('height');
+if(properties.has(someName)) {
+	// do something
+}
+
+
+
+const items = new Set([1, 2, 3, 4, 5]);
+const array = Array.from(items);
+
+
+function dedupe(array) {
+	return Array.from(new Set(array));
+}
+dedupe([1, 1, 2, 3]) // [1, 2, 3]
+
+
+ 
+
+let set = new Set(['red', 'green', 'blue']);
+for(let item of set.keys()) {
+	console.log(item);
+}
+// red
+// green
+// blue
+
+for(let item of set.values()) {
+	console.log(item);
+}
+// red
+// green
+// blue
+
+for(let item of set.entries()) {
+	console.log(item);
+}
+// ['red', 'red']
+// ['green', 'green']
+// ['blue', 'blue']
+
+
+Set.prototype[Symbol.iterator] === Set.prototype.values
+// true
+
+
+let set = new Set(['red', 'green', 'blue']);
+for(let x of set) {
+	console.log(x);
+}
+// red
+// green
+// blue
+
+let set = new Set([1, 4, 9]);
+set.forEach((value, key) => console.log(key + ' : ' + value))
+// 1: 1
+// 4: 4
+// 9: 9
+
+
+
+let set = new Set(['red', 'green', 'blue']);
+let arr = [...set];
+// ['red', 'green', 'blue']
+
+
+let arr = [3, 5, 2, 2, 5, 5];
+let unique = [...new Set(arr)];
+// [3, 5, 2]
+
+
+
+let set = new Set([1, 2, 3]);
+set = new Set([...set].map(x => x * 2));
+// 返回Set结构： {2, 4, 6}
+
+let set = new Set([1, 2, 3, 4, 5]);
+set = new Set([...set].filter(x => (x % 2) == 0));
+// 返回Set结构： {2, 4}
+
+
+
+
+let a = new Set([1, 2, 3]);
+let b = new Set([4, 3, 2]);
+// 并集
+let union = new Set([...a, ...b]); // Set {1, 2, 3, 4}
+// 交集
+let intersect = new Set([...a].filter(x => b.has(x))); // Set {2, 3}
+// 差集
+let difference = new Set([...a].filter(x => !b.has(x))); // Set {1}
+
+
+
+// 方法一
+let set = new Set([1, 2, 3]);
+set = new Set([...set].map(val => val * 2));
+// set的值是2， 4， 6
+
+// 方法二
+let set = new Set([1, 2, 3]);
+set = new Set(Array.from(set, val => val * 2));
+// set的值是2， 4， 6
+
+
+
+
+/* 2.WeakSet */
+
+const ws = new WeakSet();
+ws.add(1)
+// TypeError: Invalid value used in weak set
+ws.add(Symbol())
+// TypeError: Invalid value used in weak set
+
+
+const  a = [[1, 2], [3, 4]];
+const ws = new WeakSet(a);
+// WeakSet {[1, 2], [3, 4]}
+
+
+const b = [3, 4];
+const ws = new WeakSet(b);
+// Uncaught TypeError: Invalid value used in weak set(…)
+
+
+const ws = new WeakSet();
+const obj = {};
+const foo = {};
+
+ws.add(window);
+ws.add(obj);
+ws.has(window); // true
+ws.has(foo); // false
+ws.delete(window); 
+ws.has(window); // false
+
+
+ws.size // undefined
+ws.forEach // undefined
+ws.forEach(function(item){ console.log('WeakSet has ' + item )})
+// TypeError: undefined is not a function
+
+
+
+const foos = new WeakSet();
+class Foo {
+	constructor() {
+		foos.addthis)
+	}
+
+	method() {
+		if(!foo.has(this)) {
+			throw new TypeError('Foo.prototype.method 只能在Foo的实例上调用！');
+		}
+	}
+}
+
+
+
+/* 3.Map */
+
+const data = {}
+const element = document.getElementById('myDiv');
+data[element] = 'metadata';
+data['[object HTMLDivElement]'] // 'metadata'
+
+const m = new Map();
+const o = {p: 'Hello world!'};
+
+m.set(o, 'content');
+m.get(o) // 'content'
+m.has(o) // true
+m.delete(o) // true
+m.has(o) // false
+
+
+
+const map = new Map([
+	['name', '张三'],
+	['title', 'Author']
+]);
+
+map.size // 2
+map.has('name') // true
+map.get('name') // '张三'
+map.has('title') // true
+map.get('title') // 'Author'
+
+
+const items = [
+	['name', '张三'],
+	['title', 'Author']
+];
+
+const map = new Map();
+items.forEach(
+	([key, value]) => map.set(key, value)
+);
+
+
+
+const set = new Set([
+	['foo', 1],
+	['bar', 2]
+]);
+const m1 = new Map(set);
+m1.get('foo') // 1
+const m2 = new Map([['baz', 3]]);
+const m3 = new Map(m2);
+m3.get('baz') // 3
+
+
+
+
+const map = new Map();
+map.set(1, 'aaa').set(1, 'bbb');
+map.get(1) // 'bbb'
+
+
+
+new Map.get('assdfefeddef')
+// undefined
+
+
+const map = new Map();
+map.set(['a'], 555);
+map.get(['a']) // undefined
+
+
+
+
+const map = new Map();
+const k1 = ['a'];
+const k2 = ['a'];
+
+map.set(k1, 111).set(k2, 222);
+map.get(k1) // 111
+map.get(k2) // 222
+
+
+
+
+let map = new Map();
+map.set(-0, 123);
+map.get(+0) // 123
+
+map.set(true, 1);
+map.set('true', 2);
+map.get(true) // 1
+
+map.set(undefined, 3);
+map.set(null, 4);
+map.get(undefined) // 3
+
+map.set(NaN, 123)
+map.get(NaN) // 123
+
+
+
+
+const map = new Map();
+map.set('foo', true);
+map.set('bar', false);
+
+map.size // 2
+
+
+
+const m = new Map();
+m.set('edition', 6) // 键是字符串
+m.set(262, 'standard') // 键是数值
+m.set(undefined, 'nah') // 键是undefined
+
+
+
+let map = new Map()
+	.set(1, 'a')
+	.set(2, 'b')
+	.set(3, 'c')
+
+
+
+const m = new Map();
+const hello = function() {console.log('hello');};
+m.set(hello, 'Hello ES6!') // 键是函数
+m.get(hello) // 'Hello ES6'
+
+
+
+
+
+const m = new Map();
+m.set('edition', 6);
+m.set(262, 'standard');
+m.set(undefined, 'nah');
+
+m.has('edition') // true
+m.has('years') // false
+m.has(262) // true
+m.has(undefined) // true
+
+
+
+
+const m = new Map();
+m.set(undefined, 'nah');
+m.has(undefined) // true
+m.delete(undefined);
+m.has(undefined) // false
+
+
+
+let map = new Map();
+map.set('foo', true);
+map.set('bar', false);
+map.size // 2
+map.clear()
+map.size // 0
+
+
+
+const map = new Map([
+	['F', 'no'],
+	['T', 'yes'],
+]);
+
+for(let key of map.keys()) {
+	console.log(key);
+}
+// 'F'
+// 'T'
+
+for(let key of map.values()) {
+	console.log(value);
+}
+// 'no'
+// 'yes'
+
+for(let [key, value] of map.entries()) {
+	console.log(key, value);
+}
+// 'F' 'no'
+// 'T' 'yes'
+
+// 等同于使用map.entries()
+for(let [key, value] of map) {
+	console.log(key, value);
+}
+// 'F' 'no'
+// 'T', 'yes'
+
+map[Symbol.iterator] === map.entries // true
+
+
+
+const map = new Map([
+	[1, 'one'],
+	[2, 'two'],
+	[3, 'three'],
+]);
+[...map.keys()] // [1, 2, 3]
+[...map.values()] // ['one', 'two', 'three']
+[...map.entries()] // [[1,'one'], [2, 'two'], [3, 'three']]
+[...map] // [[1,'one'], [2, 'two'], [3, 'three']]
+
+
+
+
+const map0 = new Map()
+	.set(1, 'a')
+	.set(2, 'b')
+	.set(3, 'c');
+
+const map1 = new Map(
+	[...map0].filter((k, v) => k < 3)
+);
+// 产生Map结构 {1 => 'a', 2 => 'b'}
+
+const map2 = new Map(
+	[...map0].map(([k, v]) => [k * 2, '_' + v])
+);
+// 产生Map结构 {2 => '_a', 4 => '_b', 6 => '_c'}
+
+
+map.forEach(function(value, key, map) {
+	console.log('Key: %s, Value: %s', key, value);
+});
+
+
+const reporter = {
+	report: function(key, value) {
+		console.log('Key: %s, Value: %s', key, value);
+	}
+};
+map.forEach(function(value, key, map) {
+	this.report(key, value);
+}, reporter)
+
+
+
+
+
+const myMap = new Map()
+	.set(true, 7)
+	.set({foo: 3}, ['abc']);
+[...myMap] // [[true, 7], [{foo: 3}, ['abc']]]
+
+
+new Map([
+	[true, 7],
+	[{foo: 3}, ['abc']]
+])
+
+// Map{
+// 	true => 7m
+// 	Object {foo: 3} => ['abc']
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 4 .WeakMap */
+
+
+
+
+
+
+
+
+
 
 
 
