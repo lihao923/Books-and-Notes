@@ -4502,36 +4502,79 @@ jsonToMap('[[true, 7], [{"foo": 3}, ["abc"]]]');
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* 4 .WeakMap */
+// WeakMap可以使用set方法添加成员
+const wm1 = new WeakMap();
+const key = {foo: 1};
+wm1.set(key, 2);
+wm1.get(key) // 2
+
+// WeakMap也可以接受一个数组，作为构造函数的参数
+const k1 = [1, 2, 3];
+const k2 = [4, 5, 6];
+const wm2 = new WeakMap([[k1, 'foo'], [k2, 'bar']]);
+wm2.get(k2) // 'bar'
+
+
+const map = new WeakMap();
+map.set(1, 2) 
+// TypeError: 1 is not an object!
+map.set(Symbol(), 2)
+// TypeError: Invalid value used as weak map key
+map.set(null, 2)
+// TypeError: Invalid value used as weak map key
 
 
 
+const wm = new WeakMap();
+const element = document.getElementById('example');
+wm.set(element, 'some information');
+wm.get(element) // 'some information'
+
+
+const wm = new WeakMap();
+let key = {};
+let obj = {foo: 1}
+
+wm.set(key, obj);
+obj = null;
+wm.get(key) // Object {foo: 1}
 
 
 
+let myElement = document.getElementById('logo')
+let myWeakMap = new WeakMap();
 
+myWeakMap.set(myElement, {timesClick: 0});
+myElement.addEventListener('click', function() {
+	let logoData = myWeakMap.get(myElement);
+	logoData.timesClick++;
+}, false);
 
+const _counter = new WeakMap();
+const _action = new WeakMap();
 
-
-
-
-
+class Countdown {
+	constructor(counter, action) {
+		_counter.set(this, counter);
+		_action.set(this, action);
+	}
+	dec() {
+		let counter = _counter.get(this)
+		if(counter < 1) {
+			return;
+		}
+		counter--;
+		_counter.set(this, counter);
+		if(counter === 0) {
+			_action.get(this)();
+		}
+	}
+}
+const c = new Countdown(2, () => console.log('DONE'));
+c.dec()
+c.dec()
+// DONE
 
 
 
