@@ -4579,6 +4579,610 @@ c.dec()
 
 
 
+/*
+* 第十五章 Reflect
+*/
+
+/* 1.概述 */
+
+// 老写法
+try {
+	Object.defineProperty(target, property, attributes);
+	// success
+} catch(e) {
+	// failure
+}
+// 新写法
+if(Reflect.defineProperty(target, property, attributes)) {
+	// success
+} else {
+	// failure
+}
+
+
+// 老写法
+'assign' in Object // true
+// 新写法
+Reflect.has(Object, 'assign') // true
+
+
+
+Proxy(target, {
+	set: function(target, name, value, receiver) {
+		var success = Reflect.set(target, name, value, receiver);
+		if(success) {
+			console.log('Propery ' + name + ' on ' + target + ' set to ' + value);
+		}
+		return success;
+	}
+})
+
+
+
+var loggedObj = new Proxy(obj, {
+	get(target, name) {
+		console.log('get', target, name);
+		return Reflect.get(target, name);
+	},
+	deleteProperty(target, name) {
+		console.log('delete' + name);
+		return Reflect.deleteProperty(target, name);
+	},
+	has(target, name) {
+		console.log('has' + name);
+		return Reflect.has(target, name);
+	}
+})
+
+
+// 老写法
+Function.property.apply.call(Math.floor, undefined, [1.75]) // 1
+// 新写法
+Reflect.apply(Math.floor, undefined, [1.75]) // 1
+
+
+
+/* 2.静态方法 */
+
+var myObject = {
+	foo: 1,
+	bar: 2,
+	get baz() {
+		return this.foo + this.bar;
+	}
+}
+Reflect.get(myObject, 'foo') // 1
+Reflect.get(myObject, 'bar') // 2
+Reflect.get(myObject, 'baz') // 3
+
+var myObject = {
+	foo: 1,
+	bar: 2,
+	get baz() {
+		return this.foo + this.bar;
+	},
+};
+var myReceiverObject = {
+	foo: 4,
+	bar: 4,
+};
+Reflect.get(myObject, 'baz', myReceiverObject) // 8
+
+
+Reflect.get(1, 'foo')  // 报错
+Reflect.get(false, 'foo') // 报错
+
+
+
+
+var myObject = {
+	foo: 1,
+	set bar(value) {
+		return this.foo = value;
+	},
+}
+
+myObject.foo // 1
+Reflect.set(myObject, 'foo', 2);
+myObject.foo // 2
+Reflect.set(myObject, 'bar', 3);
+myObject.foo // 3
+
+
+var myObject = {
+	foo: 4,
+	set bar(value) {
+		return this.foo = value;
+	},
+};
+var myReceiverObject = {
+	foo: 0,
+};
+
+Reflect.set(myObject, 'bar', 1, myReceiverObject);
+myObject.foo // 4
+myReceiverObject.foo // 1
+
+
+
+let p = { a: 'a'};
+let handler = {
+	set(target, key, value, receiver) {
+		console.log('set');
+		Reflect.set(target, key, value, receiver)
+	},
+	defineProperty(target, key, attribute) {
+		console.log('defineProperty');
+		Reflect.defineProperty(target, key, attribute);
+	}
+}
+let obj = new Proxy(p, handler);
+obj.a = 'A';
+// set
+// defineProperty
+
+
+
+let p = { a: 'a'};
+let handler = {
+	set(target, key, value, receiver) {
+		console.log('set');
+		Reflect.set(target, key, value)
+	},
+	defineProperty(target, key, attribute) {
+		console.log('defineProperty');
+		Reflect.defineProperty(target, key, attribute);
+	}
+}
+let obj = new Proxy(p, handler);
+obj.a = 'A';
+// set
+
+Reflect.set(1, 'foo', {}) // 报错
+Reflect.set(false, 'foo', {}) // 报错
+
+
+
+var myObj = {
+	foo: 1
+};
+// 旧写法
+'foo' in myObj // true
+// 新写法
+Reflect.has(myObj, 'foo')
+
+
+
+
+const myObj = {foo: 'bar'};
+// 旧写法
+delete myObj.foo;
+// 新写法
+Reflect.deleteProperty(myObj, 'foo');
+
+
+
+
+function Greeting(name) {
+	this.name = name;
+}
+// new 的写法
+const instance = new Greeting('张三');
+// Reflect.construct的写法
+const instance = Reflect.construct(Greeting, ['张三']);
+
+
+
+
+const myObj = new FancyThing();
+// 旧写法
+Object.getPrototypeOf(myObj) === FancyThing.prototype;
+// 新写法
+Reflect.getPrototypeOf(myObj) === FancyThing.prototype;
+
+Object.getPrototypeOf(1); // Number {[[PrimitiveValue]]: 0}
+Reflect.getPrototypeOf(1); // 报错
+
+
+
+const myObj = {};
+// 旧写法
+Object.setPrototypeOf(myObj, Array.prototype);
+// 新写法
+Reflect.setPrototypeOf(myObj, Array.prototype);
+
+myObj.length // 0
+
+Reflect.setPrototypeOf({}, null) // true
+Reflect.setPrototypeOf(Object.freeze({}), null) // false
+
+Object.setPrototypeOf(1, {}) // 1
+Reflect.setPrototypeOf(1, {}) 
+// TypeError: Reflect.setPrototypeOf called on non-object
+
+Object.setPrototypeOf(null, {})
+// TypeError: Object.setPrototypeOf called on null or undefined
+Reflect.setPrototypeOf(null, {})
+// TypeError: Reflect.setPrototypeOf called on null or undefined
+
+
+
+
+
+const ages = [11, 33, 12, 54, 18, 96]
+// 旧写法
+const youngest = Math.min.apply(Math, ages);
+const oldest = Math.max.apply(Math, ages);
+const type = Object.prototype.toString.call(youngest);
+
+// 新写法
+const youngest = Reflect.apply(Math.min, Math, ages);
+const oldest = Reflect.apply(Math.max, Math, ages);
+const type = Reflect.apply(Object.prototype.toString, youngest, []);
+
+
+
+
+function myDate() {
+	// ...
+}
+// 旧写法
+Object.defineProperty(myDate, 'now', {
+	value: () => Date().now()
+})
+// 新写法
+Reflect.defineProperty(myDate, 'now', {
+	value: () => Date().now()
+});
+
+const p = new Proxy({}, {
+	defineProperty(target, prop, descriptor) {
+		console.log(descriptor);
+		return Reflect.defineProperty(target, prop, descriptor);
+	}
+});
+p.foo = 'bar';
+// {value: 'bar', writable: true, enumerable: true, configurable: true}
+p.foo // 'bar'
+
+
+
+
+var myObj = {}
+Object.defineProperty(myObj, 'hidden', {
+	value: true,
+	enumerable: false
+});
+// 旧写法
+var theDescriptor = Object.getOwnPropertyDescriptor(myObj, 'hidden');
+// 新写法
+var theDescriptor = Reflect.getOwnPropertyDescriptor(myObj, 'hidden');
+
+
+
+const myObject = {};
+// 旧写法
+Object.isExtensible(myObject) // true
+// 新写法
+Reflect.isExtensible(myObject) // true
+
+Object.isExtensible(1) // false
+Reflect.isExtensible(1) // 报错
+
+
+
+
+
+var myObj = {};
+// 旧写法
+Object.preventExtensions(myObj) // Object{}
+// 新写法
+Reflect.preventExtensions(myObj) // true
+
+// es5
+Object.preventExtensions(1) // 报错
+// es6
+Object.preventExtensions(1) // 1
+// 新写法
+Reflect.preventExtensions(1) // 报错
+
+
+
+var myObj = {
+	foo: 1,
+	bar: 2,
+	[symbol.for('baz')]: 3,
+	[symbol.for('bing')]: 4
+};
+// 旧写法
+Object.getOwnPropertyNames(myObj);
+// ['foo', 'bar']
+Object.getOwnPropertySymbols(myObj);
+// [Symbol(baz), Symbol(bing)]
+// 新写法
+Reflect.ownKeys(myObj);
+// ['foo', 'bar', Symbol(baz), Symbol(bing)]
+
+
+
+
+/* 3.实例：使用Proxy实现观察者模式 */
+
+const person = observable({
+	name: '张三',
+	age: 20
+});
+function print() {
+	console.log(`${person.name}, ${person.age}`)
+}
+observe(print);
+person.name = '李四';
+// 输出
+// 李四， 20
+
+const = queuedObservers = new Set();
+const observe = fn => queuedObservers.add(fn);
+const observable = obj => new Proxy(obj, {set});
+
+function set(target, key, value, receiver) {
+	const result = Reflect.set(target, key, value, receiver);
+	queuedObservers.forEach(observer => observer());
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
+/*
+* 第十六章 Promise对象
+*/
+
+/* 1.Promise的含义 */
+/* 2.基本用法 */
+
+const promise = new Promise(function(resolve, reject) {
+	// ...some code
+	if(/*异步操作成功*/) {
+		resolve(value);
+	} else {
+		reject(error);
+	}
+})
+
+
+promise.then(function(value) {
+	// success
+}, function(error) {
+	// failure
+})
+
+
+
+
+function timeout(ms) {
+	return new Promise((resolve, reject) => {
+		setTimeout(resolve, ms, 'done');
+	});
+}
+timeout(100).then((value) => {
+	console.log(value)
+})
+
+
+
+
+let promise = new Promise(function(resolve, reject) {
+	console.log('Promise');
+	resolve();
+});
+
+promise.then(function() {
+	console.log('resolved')
+});
+
+console.log('Hi')
+
+// Promise
+// Hi
+// resolved
+
+
+function loadImageAsync(url) {
+	return new Promise(function(resolve, reject) {
+		const image = new Image();
+		image.onload = function() {
+			resolve(image);
+		};
+
+		image.onerror = function() {
+			reject(new Error('Could not load image at' + url));
+		};
+
+		image.src = url;
+	});
+}
+
+
+
+const getJSON = function(url) {
+	const promise = new Promise(function(resolve, reject) {
+		const handler = function() {
+			if(this.readyState !== 4) {
+				return;
+			}
+			if(this.status === 200) {
+				resolve(this.response);
+			} else {
+				reject(new Error(this.statusText));
+			}
+		};
+
+		const client = new XMLHttpRequest();
+		client.open('GET', url);
+		client.onreadystatechange = handler;
+		client.responseType = 'json';
+		client.setRequestHeader('Accept', 'application/json');
+		client.send();
+	});
+	return promise;
+};
+
+getJSON('/posts.json').then(function(json) {
+	console.log('Contents: ' + json);
+}, function(error) {
+	console.error('出错了', error);
+})
+
+
+
+
+const p1 = new Promise(function(resolve, reject) {
+	// ...
+})
+const p2 = new Promise(function(resolve, reject) {
+	// ...
+	resolve(p1);
+})
+
+
+
+const p1 = new Promise(function(resolve, reject) {
+	setTimeout(() => reject(new Error('fail')), 3000)
+})
+ const p2 = new Promise(function(resolve, reject) {
+		setTimeout(() => resolve(p1), 1000)
+})
+
+p2
+	.then(result => console.log(result))
+	.catch(error => console.log(error))
+
+
+
+new Promise((resolve, reject) => {
+	resolve(1);
+	console.log(2);
+}).then(r => {
+	console.log(r)
+})
+
+
+
+new Promise((resolve, reject) => {
+	return resolve(1);
+	// 后面的语句不会执行
+	console.log(2);
+})
+
+
+
+
+
+/* 3.Promise.prototype.then() */
+getJSON('/posts.json').then(function(json) {
+	return json.post;
+}).then(function(post) {
+	// ...
+})
+
+
+getJSON('/post/1.json').then(function(post) {
+	return getJSON(post.commentURL);
+}).then(function(comments) {
+	console.log('resolve: ' + comments);
+}, function(err) {
+	console.log('rejected: ', err)
+})
+
+
+
+getJSON('post/1.json').then(
+	post => getJSON(post.commentURL)
+).then(
+	comments => console.log('resovled: ', comments),
+	err => console.log('rejected: ', err)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 4.Promise.prototype.catch() */
+/* 5.Promise.prototype.finally() */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
