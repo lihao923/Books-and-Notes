@@ -5111,47 +5111,532 @@ getJSON('post/1.json').then(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* 4.Promise.prototype.catch() */
+getJSON('/posts.json').then(function(posts) {
+	// ...
+}).catch(function(error) {
+	// 处理 getJSON 和 前一个回调函数运行时发生的错误
+	console.log('发生错误！', error)
+});
+
+
+
+p.then((val) => console.log('fulfilled: ', val))
+	.catch((err) => console.log('rejected: ', err));
+
+// 等同于
+p.then((val) => console.log('fulfilled: ', val))
+	.then(null, (err) => console.log('rejected: ', err));
+
+
+const promise = new Promise(function(resovle, reject) {
+	throw new Error('test');
+});
+promise.catch(function(error) {
+	console.log(error);
+});
+// Error: test
+
+
+
+// 写法一
+const promise = new Promise(function(resolve, reject) {
+	try {
+		throw new Error('test');
+	} catch(e) {
+		reject(e)
+	}
+});
+promise.catch(function(error) {
+	console.log(error);
+})
+
+// 写法二
+const promise = new Promise(function(resolve, reject) {
+	reject(new Error('test'));
+});
+promise.catch(function(error) {
+	console.log(error);
+})
+
+
+
+const promise = new Promise(function(resove, reject) {
+	resolve('ok');
+	throw new Error('test');
+});
+promise
+	.then(function(value) { console.log(value) })
+	.catch(function(error) { console.log(error) })
+// ok
+
+
+getJSON('/post/1.json').then(function(post) {
+	return getJSON(post.commentURL);
+}).then(function(comments) {
+	// some code
+}).catch(function(error) {
+	// 处理前面三个Promise产生的错误
+});
+
+
+
+// bad
+promise
+	.then(function(data) {
+		// success
+	}, function(err) {
+		// error
+	});
+// good
+promise
+	.then(function(data) {
+		// success
+	})
+	.catch(function(err) {
+		// error
+	});
+
+
+const someAsyncTing = function() {
+	return new Promise(function(resolve, reject) {
+		// 下面一行会报错，因为x没有声明
+		resolve(x + 2);
+	});
+};
+someAsyncThing().then(function() {
+	console.log('everything is great');
+});
+setTimeout(() => console.log(123), 2000);
+// Uncaught(in promise) ReferenceError: x is not defined
+// 123
+
+
+
+process.on('unhandleRejection', function(err, p) {
+	throw err;
+})
+
+
+
+const promise = new Promise(function(resolve, reject) {
+	resolve('ok');
+	setTimeout(function() {throw new Error('test')}, 0)
+});
+promise.then(function(value){console.log(value)});
+// ok
+// Uncaught Error: test
+
+
+
+const someAsyncThing = function() {
+	return new Promise(function(resolve, reject) {
+		// 下面一行会报错，因为x没有声明
+		resolve(x + 2);
+	});
+};
+someAsyncThing()
+	.catch(function(error) {
+		console.log('oh no', error)
+	})
+	.then(function() {
+		console.log('carry on')
+	})
+// oh no [ReferenceError: x is not defined]
+// carry on
+
+Promise.resolve()
+	.catch(function(err) {
+		console.log('oh no', err)
+	})
+	.then(function() {
+		console.log('carry on')
+	});
+// carry on
+
+
+
+
+
+const someAsyncThing = function() {
+	return new Promise(function(resolve, reject) {
+		// 下面一行会报错，因为x没有声明
+		resolve(x + 2);
+	});
+};
+someAsyncThing().then(function() {
+	return someOtherAsyncThing();
+}).catch(function(error) {
+	console.log('oh no', error);
+	// 下面一行会报错，因为y没有声明
+	y + 2
+}).then(function() {
+	console.log('carry on');
+})
+// oh no [ReferenceError: x is not defined]
+
+
+
+someAsyncThing().then(function() {
+	return someOtherAsyncThing();
+}).catch(function(error) {
+	console.log('oh no', error);
+	// 下面一行会报错，因为y没有声明
+	y + 2;
+}).catch(function(error) {
+	console.log('carry on', error);
+});
+// oh no [ReferenceError: x is not defined]
+// carry on [ReferenceError: y is not defined]
+
+
+
 /* 5.Promise.prototype.finally() */
 
+promise
+	.then(result => { ... })
+	.catch(error => { ... })
+	.finally(() => { ... })
+
+server.listen(port)
+	.then(function() {
+		// ...
+	})
+	.finally(server.stop);
+
+
+
+
+promise
+	.finally(() => {
+	// ...
+});
+// 等同于
+promise
+	.then(result => {
+		// ...
+		return result;
+	}, error => {
+		// ...
+		throw error;
+	});
+
+
+
+Promise.prototype.finally = function(callback) {
+	let P = this.constructor;
+	return this.then(
+		value => P.resolve(callback()).then(() => value),
+		reason => P.resolve(callback()).then(() => {throw reason})
+	)
+}
+
+
+// resolve的值是undefined
+Promise.resolve(2).then(() => {}, () => {})
+
+// resolve的值是2
+Promise.resolve(2).finally(() => {})
+
+// reject的值是undefined
+Promise.reject(3).then(() => {}, () => {})
+
+// reject的值是3
+Promise.reject(3).finally(() => {})
+
+
+
+
+/* 6.Promise.all() */
+
+const p = Promise.all([p1, p2, p3]);
+
+
+
+// 生成一个Promise对象的数组
+const promises = [2, 3, 5, 7, 11, 13].map(function(id) {
+	return getJSON('/post/' + id + '.json');
+});
+Promise.all(promises).then(function(posts) {
+	// ...
+}).catch(function(reason)) {
+	// ...
+}
+
+const databasePromise = connectDatabase();
+const booksPromise = databasePromise.then(findAllBooks);
+const userPromise = databasePromise.then(getCurrentUser);
+
+Promise.all([
+	booksPromise,
+	userPromise
+]).then(([books, user]) => pickTopRecommendations(books, user));
+
+
+const p1 = new Promise((resolve, reject) => {
+	resolve('hello');
+})
+	.then(result => result)
+	.catch(e => e);
+
+cosnt p2 = new Promise((resolve, reject) => {
+	throw Error('报错了');
+})
+	.then(result => result)
+	.catch(e => e);
+
+Promise.all([p1, p2])
+	.then(result => console.log(result))
+	.catch(e => console.log(e));
+// ['hello', Error: 报错了]
+
+
+
+const p1 = new Promise((resolve, reject) => {
+	resolve('hello');
+}).then(result => result)
+
+cosnt p2 = new Promise((resolve, reject) => {
+	throw Error('报错了');
+}).then(result => result)
+
+Promise.all([p1, p2])
+	.then(result => console.log(result))
+	.catch(e => console.log(e));
+// Error: 报错了
 
 
 
 
 
+/* 7.Promise.race() */
+
+const p = Promise.race([p1, p2, p3]);
+
+
+
+const p = Promise.race([
+	fetch('/resource-that-may-take-a-while'),
+	new Promise(function(resolve, reject) {
+		setTimeout(() => reject(new Error('request timeout')), 5000)
+	})
+]);
+
+p.then(console.log).catch(console.error);
+
+
+
+/* 8.Promise.allSettleed() */
+const promises = [
+	fetch('/api-1'),
+	fetch('/api-2'),
+	fetch('/api-3'),
+]
+await Promise.allSettled(promises)
+removeLoadingIndicator();
+
+
+
+const resolved = Promise.resolve(42);
+cosnt rejected = Promise.reject(-1);
+
+const allSettledPromise = Promise.allSettled([resolved, rejected]);
+
+allSettledPromise.then(function(results) {
+	console.log(results);
+})
+// [
+// 	 {status: 'fulfilled', value: 42}
+// 	 {status: 'rejected', reason: -1}
+// ]
+
+
+
+const promises = [fetch('index.html'), fetch('https://does-not-exist/')];
+const results = await Promise.allSettled(promises)
+
+// 过滤出成功的请求
+const successfulPromises = results.filter(p => p.status === 'fulfilled');
+
+// 过滤出失败的请求，并输出原因
+const errors = results.filter(p => p.status === 'rejected').map(p => p.reason);
+
+
+
+const url = [ /* ... */]
+const requests = url.map(x => fetch(x));
+
+try {
+	await Promise.all(requests);
+	console.log('所有请求都成功。');
+} catch {
+	console.log('至少一个请求失败，其他请求可能还没结束。');
+}
+
+
+
+/* 9.Promise.any() */
+
+const promise = [
+	fetch('endpoint-a').then(() => 'a'),
+	fetch('endpoint-b').then(() => 'b'),
+	fetch('endpoint-c').then(() => 'c'),
+];
+try {
+	const first = await Promise.any(promises);
+	console.log(first);
+} catch {
+	console.log(error);
+}
+
+
+
+new AggregateError() extends Array -> AggregateError
+const err = new AggregateError();
+err.push(new Error('first error'));
+err.push(new Error('second error'));
+throw err;
+
+
+Promise.any(promises).then((first) => {
+	// Any of the promises was fulfilled.
+}, (error) => {
+	// All of the promises were rejected.
+})
+
+
+var resolved = Promises.resolve(42);
+var rejected = Promises.rejected(-1);
+var alsoRejected = Promise.reject(Infinity);
+Promise.any([resolved, rejected, alsoRejected]).then(function(result) {
+	console.log(result); // 42
+});
+Promise.any([rejected, alsoRejected]).catch(function(results) {
+	console.log(results)// [-1, Infinity]
+});
+
+
+
+/* 10.Promise.resolve() */
+const jsPromise = Promise.resolve($.ajax('/whatever.json'));
+
+Promise.resolve('foo')
+// 等价于
+new Promise(resolve => resolve('foo'))
+
+
+let thenable = {
+	then: function(resolve, reject) {
+		resolve(42);
+	}
+}
+let p1 = Promise.resolve(thenable);
+p1.then(function(value) {
+	console.log(value);
+})
+
+
+
+const p = Promise.resolve('Hello');
+p.then(function(s) {
+	console.log(s)
+});
+// Hello
+
+
+
+const p = Promise.resolve();
+p.then(function(){/* ... */})
 
 
 
 
+setTimeout(function() {
+	console.log('time');
+}, 0);
+Promise.resolve().then(function() {
+	console.log('two');
+});
+
+console.log('one');
+// one
+// two
+// three
+
+// 上面代码中，setTimeout(fn, 0)在下一轮“事件循环”开始时执行，
+// Promise.resolve()在本轮“事件循环”结束时执行，
+// console.log('one')则是立即执行，因此最先输出
 
 
 
+/* 11.Promise.reject() */
+const p = Promise.reject('出错了');
+// 等同于
+const p = new Promise((resolve, reject) => reject('出错了'))
+p.then(null, function(s) {
+	console.log(s);
+});
+// 出错了
+
+
+const thenable = {
+	then(resolve, reject) {
+		reject('出错了');
+	}
+};
+
+Promise.reject(thenable).catch(e => {
+	console.log(e === thenable)
+})
+// true
+
+
+/* 12.应用 */
+
+const preloadImage = function(path) {
+	return new Promise(function(resolve, reject) {
+		const image = new Image();
+		image.onload = resolve;
+		image.onerror = reject;
+		image.src = path;
+	})
+}
 
 
 
+function getFoo() {
+	return new Promise(function(resolve, reject) {
+		resolve('foo');
+	});
+}
+const g = function*() {
+	try {
+		const foo = yield getFoo();
+		console.log(foo);
+	} catch(e) {
+		console.log(e);
+	}
+};
+
+function run(generator) {
+	const it = generator();
+	function go(result) {
+		if(result.done) {
+			return result.value;
+		}
+		return result.value.then(function(value) {
+			return go(it.next(value));
+		}, function(error) {
+			return go(it.throw(error))
+		});
+	}
+	go(it.next());
+}
+run(g);
 
 
 
+/* 13.Promise.try() */
 
 
 
