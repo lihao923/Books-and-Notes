@@ -6030,17 +6030,7 @@ function readLinesSync(file) {
 }
 
 
-// 情况一
-for(let line of readLinesSync(fileName)) {
-	console.log(line);
-	break;
-}
 
-// 情况二
-for(let line of readLineSync(fileName)) {
-	console.log(line);
-	throw new Error();
-}
 
 
 
