@@ -6213,6 +6213,2003 @@ for(var n of fibonacci) {
 
 
 
+/*
+*
+* 第十八章 Generator函数的语法
+*
+*/
+
+
+/* 1.简介 */
+
+function* helloWorldGenerator() {
+	yield 'hello';
+	yield 'world';
+	return 'ending';
+}
+var hw = helloWorldGenerator();
+
+hw.next() // {value: 'hello', done: false}
+hw.next() // {value: 'world', done: false}
+hw.next() // {value: 'ending', done: true}
+hw.next() // {value: undefined, done: true}
+
+
+function* f() {
+	console.log('执行了！')
+}
+var generator = f();
+setTimeout(function() {
+	generator.next()
+}, 2000); 
+
+
+var arr = [1, [[2, 3], 4], [5, 6]];
+var flat = function* (a) {
+	a.forEach(function(item) {
+		if(typeof item !== 'number') {
+			yield* flat(item);
+		} else {
+			yield item;
+		}
+	});
+};
+for(var f of flat(arr)) {
+	console.log(f);
+}
+
+
+
+var arr = [1, [[2, 3], 4], [5, 6]];
+var flat = function* (a) {
+	var length = a.length;
+	for(var i = 0; i < length; i++) {
+		var item = a[i];
+		if(typeof item !== 'number') {
+			yield* flat(item);
+		} else {
+			yield item
+		}
+	}
+};
+for(var f of flat(arr)) {
+	console.log(f);
+}
+// 1, 2, 3, 4, 5, 6
+
+
+function* demo() {
+	console.log('Hello' + yield); // SyntaxError
+	console.log('Hello' + yield 123); // SyntaxError
+
+	console.log('Hello' + (yield)); // OK
+	console.log('Hello' + (yield 123)); // OK
+}
+
+
+var myIterable = {}
+myIterable[Symbol.iterator] = function* () {
+	yield 1;
+	yield 2;
+	yield 3;
+};
+[...myIterable] // [1, 2, 3]
+
+
+
+function* gen() {
+	// some code
+}
+var g = gen();
+g[Symbol.iterator]() === g
+// true
+
+
+/* 2.next方法的参数 */
+function* f() {
+	for(var i = 0; true; i++) {
+		var reset = yield i;
+		if(reset) { i = -1; }
+	}
+}
+var g = f();
+g.next(); // {value: 0, done: false}
+g.next(); // {value: 1, done: false}
+g.next(true); // {value: 0, done: false}
+
+
+function* foo(x) {
+	var y = 2 * (yield (x + 1));
+	var z = yield (y / 3);
+	return (x + y + z);
+}
+var a = foo(5);
+a.next() // Object{value: 6, done: false}
+a.next() // Object{value: NaN, done: false}
+a.next() // Object{value: NaN, done: true}
+
+var b = foo(5);
+b.next() // {value: 6, done: false}
+b.next() // {value: 8, done: false}
+b.next() // {vlaue: 42, done: true}
+
+
+function* dataConsumer() {
+	console.log('Started');
+	console.log(`1. ${yield}`);
+	console.log(`2. ${yield}`);
+	return 'result';
+}
+let genObj = dataConsumer();
+genObj.next();
+// Started
+genObj.next('a');
+// 1.a
+genObj.next('b');
+// 2.b
+
+
+
+function wrapper(generatorFunction) {
+	return function(...args) {
+		let generatorOject = generatorFunction(...args);
+		generatorObject.next();
+		return generatorObject;
+	};
+}
+const wrapped = wrapper(function* () {
+	console.log(`First input; ${yield}`);
+	return 'DONE';
+});
+wrapped().next('hello!')
+// First input: hello!
+
+
+
+/* 3.for...of循环 */
+
+function* foo() {
+	yield 1;
+	yield 2;
+	yield 3;
+	yield 4;
+	yield 5;
+	return 6;
+}
+for(let v of foo()) {
+	console.log(v);
+}
+// 1 2 3 4 5
+
+
+function* fibonacci() {
+	let [prev, curr] = [0, 1]
+	for(;;) {
+		yield curr;
+		[prev, curr] = [curr, prev + curr];
+	}
+}
+for(let n of fibonacci()) {
+	if(n > 1000) break;
+	console.log(n);
+}
+
+
+
+function* objectEntries(obj) {
+	let propKeys = Reflect.ownKeys(obj);
+	for(let propKey of propKeys) {
+		yield [propKey, obj[propKey]];
+	}
+}
+let jane = {first: 'Jane', last: 'Doe'};
+for(let [key, value] of objectEntries(jane)) {
+	console.log(`${key}: ${value}`);
+}
+// first: Jane
+// last: Doe
+
+
+function* objectEntries() {
+	let propKeys = Object.keys(this);
+	for(let propKey of propKeys) {
+		yield [propKey, this[propKey]];
+	}
+}
+let jane = {first: 'Jane', last: 'Doe'};
+jane[Symbol.iterator] = objectEntries;
+
+for(let [key, value] of jane) {
+	console.log(`${key}: ${value}`);
+}
+// first: Jane
+// last: Doe
+
+
+function* numbers() {
+	yield 1
+	yield 2
+	return 3
+	yield 4
+}
+// 扩展运算符
+[...numbers()] // [1, 2]
+
+// Array.from方法
+Array.from(numbers()) // [1, 2]
+
+// 解构赋值
+let [x, y] = numbers();
+x // 1
+y // 2
+
+// for...of循环
+for(let n of numbers()) {
+	console.log(n);
+}
+// 1
+// 2
+
+
+/* 4.Generator.prototype.throw() */
+
+var g = function* () {
+	try {
+		yield;
+	} catch(e) {
+		console.log('内部捕获', e);
+	}
+};
+
+var i = g();
+i.next();
+
+try {
+	i.throw('a');
+	i.throw('b');
+} catch(e) {
+	console.log('外部捕获', e);
+}
+// 内部捕获 a
+// 外部捕获 b
+
+
+
+var g = function* () {
+	try {
+		yield;
+	} catch(e) {
+		console.log(e);
+	}
+};
+var i = g();
+i.next();
+i.throw(new Error('出错了！'))；
+// Error：出错了！
+
+
+var g = function* () {
+	while(true) {
+		try{
+			yield;
+		} catch(e) {
+			if(e != 'a') {
+				throw e;
+			}
+			console.log('内部捕获', e);
+		}
+	}
+};
+
+var i = g();
+i.next();
+
+try{
+	throw new Error('a');
+	throw new Error('b');
+} catch(e) {
+	console.log('外部捕获', e);
+}
+// 外部捕获 [Error: a]
+
+
+var g = function* () {
+	while(true) {
+		yield;
+		console.log('内部捕获', e);
+	}
+};
+var i = g();
+i.next();
+
+try {
+	i.throw('a');
+	i.throw('b');
+} catch(e) {
+	console.log('外部捕获', e);
+}
+// 外部捕获 a
+
+
+
+var gen = function* gen() {
+	yield console.log('hello');
+	yield console.log('world');
+}
+var g = gen();
+g.next();
+g.throw();
+// hello
+// Uncaught undefined
+
+
+function* gen() {
+	try {
+		yield 1;
+	} catch(e) {
+		console.log('内部捕获');
+	}
+}
+var g = gen();
+g.throw(1);
+// Uncaught 1
+
+
+
+var gen = function* gen() {
+	try {
+		yield console.log('a');
+	} catch(e) {
+		// ...
+	}
+	yield console.log('b');
+	yield console.log('c');
+}
+
+var g = gen();
+g.next() // a
+g.throw() // b
+g.next() // c
+
+
+
+
+var gen = function* gen() {
+	yield console.log('hello');
+	yield console.log('world');
+}
+var g = gen();
+g.next();
+
+try {
+	throw new Error();
+} catch(e) {
+	g.next();
+}
+// hello
+// world
+
+
+
+function* foo() {
+	var x = yield 3;
+	var y = x.toUpperCase();
+	yield y;
+}
+var it = foo();
+it.next(); // {value: 3, done: false}
+
+try{
+	it.next(42);
+} catch(err) {
+	console.log(err);
+}
+
+
+
+
+function* g() {
+	yield 1;
+	console.log('throwing an exception');
+	throw new Error('generator broke!');
+	yield 2;
+	yield 3;
+}
+function log(generator) {
+	var v;
+	console.log(`starting generator`);
+	try{
+		v = generator.next();
+		console.log('第一次运行next方法', v);
+	} catch(err) {
+		console.log('捕捉错误', v);
+	}
+
+	try{
+		v = generator.next();
+		console.log('第二次运行next方法', v);
+	} catch(err) {
+		console.log('捕捉错误', v);
+	}
+
+	try{
+		v = generator.next();
+		console.log('第三次运行next方法', v);
+	} catch(err) {
+		console.log('捕捉错误', v);
+	}
+
+	console.log('caller done');
+}
+log(g());
+// starting generator
+// 第一次运行next方法 {value: 1, done: false}
+// throwing an exception
+// 捕捉错误 {value: 1, done: false}
+// 第三次运行next方法 {value: undefined, done: true}
+// caller done
+
+
+
+/* 5.Generator.prototype.return() */
+
+function* gen() {
+	yield 1;
+	yield 2;
+	yield 3;
+}
+var g = gen();
+g.next() // {value: 1, done: false}
+g.return('foo') // {value: 'foo', done: true}
+g.next() // {value: undefined, done: true}
+
+
+
+function* gen() {
+	yield 1;
+	yield 2;
+	yield 3;
+}
+var g = gen();
+g.next() // {value: 1, done: false}
+g.return // {value: undefined, done: true}
+
+
+function* numbers() {
+	yield 1;
+	try{
+		yield 2;
+		yield 3;
+	} finally {
+		yield 4;
+		yield 5;
+	}
+	yield 6;
+}
+var g = numbers();
+g.next() // {value: 1, done: false}
+g.next() // {value: 2, done: false}
+g.return(7) // {value: 4, done: false}
+g.next() // {value: 5, done: false}
+g.next() // {value: 7, done: true}
+
+
+
+
+/* 6.next(), throw(), return()的共同特点 */
+const g = function* (x, y) {
+	let result = yield x + 7;
+	return result;
+};
+const gen = g(1, 2);
+gen.next(); // Object{vlaue: 3, done: false}
+gen.next(1); // Object{}
+// 相当于将 let result =  yield x + y
+// 替换成 let result = 1
+
+gen.throw(new Error('出错了')); // Uncaught Error: 出错了
+// 相当于将 let result = yield x + y
+// 替换成 let result = throw(new Error('出错了'));
+
+gen.return(2); // Object(value: 2, done: true)
+// 相当于将 let result = yield x + y
+// 替换成 let result = return 2;
+
+
+
+
+/* 7.yield*表达式 */
+function* foo() {
+	yield 'a';
+	yield 'b';
+}
+function* bar() {
+	yield 'x';
+	// 手动遍历foo()
+	for(let i of foo()) {
+		console.log(i);
+	}
+	yield 'y';
+}
+for(let v of bar()) {
+	console.log(v);
+}
+// x
+// a
+// b
+// y
+
+
+
+function* bar() {
+	yield 'x';
+	yield* foo();
+	yield 'y';
+}
+
+// 等同于
+function* bar() {
+	yield 'x';
+	yield 'a';
+	yield 'b';
+	yield 'y';
+}
+
+// 等同于
+function* bar() {
+	yield 'x';
+	for(let v of foo()) {
+		yield v;
+	}
+	yield 'y';
+}
+
+for(let v of bar()) {
+	console.log(v);
+}
+// 'x'
+// 'a'
+// 'b'
+// 'y'
+
+
+
+function* inner() {
+	yield 'hello!';
+}
+function* outer1() {
+	yield 'open';
+	yield inner();
+	yield 'close';
+}
+
+var gen = outer1();
+gen.next().value // 'open'
+gen.next().value // 返回一个遍历器对象
+gen.next().value // 'close'
+
+function* outer2() {
+	yield 'open';
+	yield* inner();
+	yield 'close';
+}
+var gen = outer2()
+gen.next().value // 'open'
+gen.next().value // 'hello!'
+gen.next().value // 'close'
+
+
+
+let delegatedIterator = (function* (){
+	yield 'Hello!';
+	yield 'Bye';
+}());
+let delegatingIterator = (function* (){
+	yield 'Greetings!';
+	yield* delegatedIterator;
+	yield 'Ok, bye.';
+}());
+
+for(let value of delegatingIterator) {
+	console.log(value);
+}
+// 'Greetings!'
+// 'Hello!'
+// 'Bye!'
+// 'Ok, bye.'
+
+
+
+
+function* concat(iter1, iter2) {
+	yield* iter1;
+	yield* iter2;
+}
+// 等同于
+function* concat(iter1, iter2) {
+	for(var value of iter1) {
+		yield value;
+	}
+	for(var value of iter2) {
+		yield value;
+	}
+}
+
+
+
+function* gen() {
+	yield* ['a', 'b', 'c'];
+}
+gen().next() // [value: 'a', done: false]
+
+
+
+
+let read = (function* () {
+	yield 'hello';
+	yield* 'hello';
+})();
+read.next().value // 'hello'
+read.next().value // 'h'
+
+
+
+
+
+function* foo() {
+	yield 2;
+	yield 3;
+	return 'foo';
+}
+
+function* bar() {
+	yield 1;
+	var v = yield* foo();
+	console.log('v: ' + v);
+	yield 4;
+}
+var it = bar();
+
+it.next() // {value: 1, done: false}
+it.next() // {value: 2, done: false}
+it.next() // {value: 3, done: false}
+it.next() // 'v: foo' {value: 4, done: false}
+it.next() // {value: undefined, done: true}
+
+
+
+
+
+
+function* iterTree(tree) {
+	if(Array.isArray(tree)) {
+		for(let i = 0; i < tree.length; i++) {
+			yield* iterTree(tree[i]);
+		}
+	} else {
+		yield tree;
+	}
+}
+const tree = ['a', ['b', 'c'], ['d', 'e']];
+for(let x of iterTree(tree)) {
+	console.log(x);
+}
+// a
+// b
+// c
+// d
+// e
+
+[...iterTree(tree)] // ['a', 'b', 'c', 'd', 'e']
+
+
+
+/* 8.作为对象属性的Generator函数 */
+
+let obj = {
+	* myGeneratorMethod() {
+		// ...
+	}
+};
+// 等价于
+let obj = {
+	myGeneratorMethod: function* () {
+		// ...
+	}
+}
+
+
+
+/* 9.Generator函数的this */
+function* g() {}
+g.prototype.hello = function() {
+	return 'hi!';
+};
+
+let obj = g();
+obj instanceof g // true
+obj.hello() // 'hi!'
+
+function* g() {
+	this.a = 11;
+}
+let obj = g();
+obj.next();
+obj.a // undefined
+
+
+function* F() {
+	yield this.x = 2;
+	yield this.y = 3;
+}
+new F()
+// TypeError: F is not a constructor
+
+
+
+function* F() {
+	this.a = 1;
+	yield this.b = 2;
+	yield this.c = 3;
+}
+var obj = {};
+var f = F.call(obj);
+
+f.next(); // Object{value: 2, done: false}
+f.next(); // Object{value: 3, done: false}
+f.next(); // Object{value: undefined, done: true}
+
+obj.a // 1
+obj.b // 2
+obj.c // 3
+
+
+
+
+function* F() {
+	this.a = 1;
+	yield this.b = 2;
+	yield this.c = 3;
+}
+var f = F.call(F.prototype);
+
+f.next(); // Object{value: 2, done: false}
+f.next(); // Object{value: 3, done: false}
+f.next(); // Object{value: undefined, done: true}
+f.a // 1
+f.b // 2
+f.c // 3
+
+
+
+function* gen() {
+	this.a = 1;
+	yield this.b = 2;
+	yield this.c = 3;
+}
+var f = F.call(F.prototype);
+
+f.next(); // Object{value: 2, done: false}
+f.next() // Object{value: 3, done: false}
+f.next() // Object{value: undefined, done: true}
+
+f.a // 1
+f.b // 2
+f.c // 3
+
+
+
+
+
+/* 10.含义 */
+var ticking = true;
+var clock = function() {
+	if(ticking) {
+		console.log('Tick!');
+	} else {
+		console.log('Tock!');
+		ticking = !ticking;
+	}
+}
+
+
+
+var clock = function* () {
+	while(true) {
+		console.log('Tick!');
+		yield;
+		console.log('Tock!');
+		yield;
+	}
+}
+
+
+
+
+/* 11.应用 */
+function* loadUI() {
+	showLoadingScreen();
+	yield loadUIDataAsynchronously();
+	hideLoadingScreen();
+}
+
+var loader = loadUI();
+// 加载UI
+loader.next()
+
+// 卸载UI
+loader.next()
+
+
+
+function* main() {
+	var result = yield request('http://some.url');
+	var resp = JSON.parse(result);
+	console.log(resp.value);
+}
+function request(url) {
+	makeAjaxCall(url, function(response) {
+		it.next(response);
+	});
+}
+var it = main();
+it.next();
+
+
+
+
+function* numbers() {
+	let file = new FileReader('numbers.txt')
+	try{
+		while(!file.eof) {
+			yield parseInt(file.readLine(), 10)
+		}
+	} finally {
+		file.close();
+	}
+}
+
+
+
+/*
+*
+* 第十九章 Generator 函数的异步应用
+*
+*/
+
+/* 1.传统方法 */
+
+/* 2.基本概念 */
+fs.readFile('/etc/passwd', 'utf-8', function(err, data) {
+	if(err) {
+		throw err;
+	}
+	console.log(data);
+})
+
+
+
+fs.readFile(fileA, 'utf-8', function(err, data) {
+	fs.readFile(fileB, 'utf-8', function(err, data) {
+		// ...
+	})
+})
+
+
+
+var readFile = require('fs-readfile-promise');
+readFile(fileA)
+.then(function(data) {
+	console.log(data.toString());
+})
+.then(function() {
+	return readFile(fileB);
+})
+.then(function(data) {
+	console.log(data.toString());
+})
+.catch(function(err) {
+	console.log(err);
+});
+
+
+
+
+/* 3.Generator函数 */
+function* asyncJob() {
+	// ...其他代码
+	var f = yield readFile(fileA);
+	// ...其他代码
+}
+
+
+
+function* gen(x) {
+	var y = yield x + 2;
+	return y;
+}
+var g = gen(1);
+g.next() // {value: 3, done: false}
+g.next() // {value: undefind, done: true}
+
+
+
+function* gen(x) {
+	var y = yield x + 2;
+	return y;
+}
+var g = gen(1);
+g.next() // {value: 3, done: false}
+g.next(2) // {value: 2, done: true}
+
+
+
+function* gen(x) {
+	try{
+		var y = yield x + 2;
+	} catch(e) {
+		console.log(e);
+	}
+	return y;
+}
+var g = gen(1);
+g.next();
+g.throw('出错了！')
+// 出错了！
+
+
+
+var fetch = require('node-fetch');
+function* gen(){
+	var url = 'https://api.github.com/users/github';
+	var result = yield fetch(url);
+	console.log(result.bio);
+}
+
+var g = gen();
+var result = g.next();
+
+result.value.then(function(data) {
+	return data.json();
+}).then(function(data) {
+	g.next(data);
+})
+
+
+
+/* 4.Thunk函数 */
+var x = 1;
+function f(m) {
+	return m * 2;
+}
+f(x + 5)
+
+f(x + 5)
+// 调用时传值，等同于
+f(6)
+
+
+f(x + 5)
+// 传名调用时，等同于
+(x + 5) * 2
+
+
+function(a, b) {
+	return b;
+}
+f(x * x * x - 2 * x - 1, x);
+
+
+
+function f(m) {
+	return m * 2;
+}
+f(x + 5);
+
+// 等同于
+var thunk = function() {
+	return x + 5;
+};
+function f(thunk) {
+	return thunk() * 2;
+}
+
+
+// 正常版本的readFile(多参数版本)
+fs.readFile(fileName, callback);
+
+// Thunk版本的readFile(但参数版本)
+var Thunk = function(fileName) {
+	return function(callback) {
+		return fs.readfile(filename, callback);
+	};
+};
+var readFileThunk = Thunk(fileName);
+readFileThunk(callback);
+
+
+
+
+// ES5版本
+var Thunk = function(fn) {
+	return function() {
+		var args = Array.prototype.slice.call(arguments);
+		return function(callback) {
+			args.push(callback);
+			return fn.apply(this, args);
+		}
+	};
+};
+
+// ES6版本
+const Thunk = function(fn) {
+	return function(...args) {
+		return function(callback) {
+			return fn.call(this, ...args, callback);
+		}
+	};
+};
+
+
+
+var readFileThunk = Thunk(fs.readFile);
+readFileThunk(fileA)(callback);
+
+function f(a, cb) {
+	cb(a);
+}
+const ft = Thunk(f);
+ft(1)(console.log);
+
+
+
+
+var thunkify = require('thunkify');
+var fs = require('fs');
+
+var read = thunkify(fs.readFile);
+read('package.json')(function(err, str) {
+	// ...
+})
+
+
+
+function thunkify(fn) {
+	return function() {
+		var args = new Array(argunments.length);
+		var ctx = this;
+
+		for(var i = 0; i < args.length; ++i) {
+			args[i] = arguments[i];
+		}
+
+		return function(done) {
+			var called;
+			
+			args.push(function() {
+				if(called) return;
+				called = true;
+				done.apply(null, arguments);
+			});
+
+			try{
+				fn.apply(ctx, args);
+			}catch(err) {
+				done(err);
+			}
+		}
+	}
+};
+
+
+function f(a, b, callback) {
+	var sum = a + b;
+	callback(sum);
+	callback(sum);
+}
+
+var ft = thunkify(f);
+var print = console.log.bind(console);
+ft(1, 2)(print);
+// 3
+
+
+function* gen() {
+	// ...
+}
+var g = gen();
+var res = g.next();
+
+while(!res.done) {
+	console.log(res.value);
+	res = g.next;
+}
+
+
+var fs = require('fs');
+var thunkify = require('thunkify');
+var readFileThunk = thunkify(fs.readFile);
+
+var gen = function* (){
+	var r1 = yield readFileThunk('/etc/fstab');
+	console.log(r1.toString());
+	var r2 = yield readFileThunk('/etc/shells');
+	console.log(r2.toString());
+}
+
+
+
+var g = gen();
+
+var r1 = g.next();
+r1.value(function(err, data) {
+	if(err) {
+		throw err;
+	}
+	r2.value(function(err, data) {
+		if(err) {
+			throw err;
+		}
+		g.next(data);
+	})
+})
+
+
+
+
+function run(fn) {
+	var gen = fn();
+	function next(err, data) {
+		var result = gen.next(data);
+		if(result.done) return;
+		result.value(next);
+	}
+	next();
+}
+function* g() {
+	// ...
+}
+run(g);
+
+
+
+var g = function* (){
+	var f1 = yield readFileThunk('fileA');
+	var f2 = yield readFileThunk('fileB');
+	// ...
+	var fn = yield readFileThunk('fileN');
+};
+
+run(g);
+
+
+
+/* 5.co模块 */
+var gen = function* () {
+	var f1 = yield readFile('/etc/fstab');
+	var f2 = yield readFile('/etc/shells');
+	console.log(f1.toString());
+	console.log(f2.toString());
+};
+
+var co = require('co');
+co(gen);
+
+co(gen).then(function() {
+	console.log('Generator 函数执行完成！');
+});
+
+
+
+
+var fs = require('fs');
+var readFile = function(fileName) {
+	return new Promise(function(resolve, reject) {
+		fs.readFile(fileName, function(error, data) {
+			if(error) {
+				return reject(error);
+			}
+			resolve(data);
+		});
+	});
+};
+
+var gen = function* () {
+	var f1 = yield readFile('/etc/fstab');
+	var f2 = yield readFile('/etc/shells');
+	console.log(f1.toString());
+	console.log(f2.toString());
+}
+
+var g = gen();
+g.next().value.then(function(data){
+	g.next(data).value.then(function(data) {
+		g.next(data);
+	});
+});
+
+
+function run(gen){
+	var g = gen();
+	
+	function next(data) {
+		var result = g.next(data);
+		if(result.done) {
+			return result.value;
+		}
+		result.value.then(function(data) {
+			next(data);
+		})
+	}
+	next();
+}
+run(gen);
+
+
+
+
+
+function co(gen) {
+	var ctx = this;
+	
+	return new Promise(function(resolve, reject) {
+		if(typeof gen === 'function') {
+			gen = gen.call(ctx);
+		}
+		if(!gen || typeof gen.next !== 'function') {
+			return resolve(gen);
+		}
+
+		onFullfilled();
+		function onFullfilled(res) {
+			var ret;
+			try{
+				ret = gen.next(res);
+			} catch(e) {
+				return reject(e);
+			}
+			next(ret);
+		}
+	});
+}
+
+
+function next(ret) {
+	if(ret.done) {
+		return resolve(ret.value);
+	}
+	var value = toPromise.call(ctx, ret.value);
+	if(value && isPromise(value)) {
+		return value.then(onFullfilled, onRejected);
+	}
+	return onRejected(
+		new TypeError(
+			'You may only yield a function, promise, generator, array, or object, '
+			+ 'but the following object was passed: "'
+			+ String(ret.value)
+			+ '"'
+		)
+	)
+}
+
+
+
+
+// 数组的写法
+co(function* () {
+	var res = yield [
+		Promise.resolve(1);
+		Promise.resolve(2);
+	];
+	console.log(res);
+}).catch(onerror);
+
+// 对象的写法
+co(function* () {
+	var res = yield {
+		1: Promise.resolve(1),
+		2: Promise.resolve(2),
+	};
+	console.log(res);
+}).catch(onerror);
+
+
+co(function* () {
+	var values = [n1, n2, n3];
+	yield values.map(somethingAsync);
+});
+
+function* somethingAsync(x) {
+	// do something async
+	return y
+}
+
+
+
+const co = require('co');
+const fs = require('fs');
+
+const stream = fs.createReadStream('./les_miserables.txt');
+let valjeanCount = 0;
+
+co(function* (){
+	while(true) {
+		const res = yield Promise.race([
+			new Promise(resolve => stream.once('data', resolve)),
+			new Promise(resolve => stream.once('end', resolve)),
+			new Promise((resolve, reject) => stream.once('error', reject))
+		]);
+		if(!res) {
+			break;
+		}
+
+		stream.removeAllListeners('data');
+		stream.removeAllListeners('end');
+		stream.removeAllListeners('error');
+		valjeanCount += (res.toString().match(/valjean/ig) || []).length
+	}
+	console.log('count: '. valjeanCount); // count: 1120
+});
+
+
+
+
+
+/*
+*
+* 第二十章 async函数
+*
+*/
+
+
+/* 1.含义 */
+
+const fs = require('fs');
+
+const readFile = function(fileName) {
+	return new Promise(function(resolve, reject) {
+		fs.readFile(fileName, function(error, data) {
+			if(error) {
+				return reject(error);
+			}
+			resolve(data);
+		});
+	});
+};
+
+const gen = function* () {
+	const f1 = await readFile('/etc/fstab');
+	const f2 = await readFile('/etc/shells');
+	console.log(f1.toString());
+	console.log(f2.toString());
+}
+
+const asyncReadFile = async function() {
+	const f1 = await readFile('/etc/fstab');
+	const f2 = await readFile('/etc/shells');
+	console.log(f1.toString());
+	console.log(f2.toString());
+}
+
+
+
+/* 2.基本用法 */
+
+async function getStockPriceByName(name) {
+	const symbol = await getStockSymbol(name);
+	const stockPrice = await getStockPrice(symbol);
+
+	return stockPrice;
+}
+
+getStockPriceByName('goog').then(function(result) {
+	console.log(result);
+})
+
+
+
+
+
+
+function timeout(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
+async function asyncPrint(value, ms) {
+	await timeout(ms);
+	console.log(value);
+}
+
+asyncPrint('hello world', 50)
+
+
+
+
+async function timeout(ms) {
+	await new Promise((resolve) => {
+		setTimout(resolve, ms);
+	});
+}
+
+async function asyncPrint(value, ms) {
+	await timeout(ms);
+	console.log(value);
+}
+
+asyncPrint('hello world', 50)
+
+
+
+// 函数声明
+async function foo() {}
+
+// 函数表达式
+const foo = async function() {};
+
+// 对象的方法
+let obj = {async foo() {}};
+obj.foo().then()
+
+// Class的方法
+class Storage {
+	constructor() {
+		this.cachePromise = caches.open('avatars');
+	}
+
+	async getAvatar(name) {
+		const cache = await this.cachePromise;
+		return cache.match(`/avatars/${name}.jpg`);
+	}
+}
+
+const storage = new Storage();
+storage.getAvatar('jake').then(...);
+
+// 箭头函数
+const foo = async ()=> {}
+
+
+
+/* 3.语法 */
+async function f() {
+	return 'hello world';
+}
+
+f().then(v => console.log(v));
+// 'hello world'
+
+
+
+async function f() {
+	throw new Error('出错了！');
+}
+
+f().then(
+	v => console.log(v),
+	e => console.log(e)
+)
+// Error: 出错了
+
+
+
+
+async function getTitle(url) {
+	let response = await fetch(url);
+	let html = await response.text();
+	return html.match(/<title>([\s\S]+)<\/title>/i)[1];
+}
+
+getTitle('https//tc39.github.io/ecma262/').then(console.log);
+// 'ECMAScript 2017 Language Specification'
+
+
+
+async function f() {
+	// 等同于
+	// return 123;
+	return await 123;
+}
+
+f().then(v => console.log(v));
+// 123
+
+
+
+class Sleep{
+	constructor(timeout) {
+		this.timeout = timeout;
+	}
+	then(resolve, reject) {
+		const startTime = Date.now();
+		setTimeout(
+			() => resolve(Data.now() - startTime),
+			this.timeout
+		);
+	}
+}
+
+(async () => {
+	const sleepTime = await new Sleep(1000);
+	console.log(sleepTime);
+})();
+// 1000
+
+
+
+
+function sleep(interval) {
+	return new Promise(resolve => {
+		setTimeout(resolve, interval);
+	})
+}
+
+// 用法
+async function one2FiveInAsync() {
+	for(let i = 1; i <= 5; i++) {
+		console.log(i);
+		await sleep(1000);
+	}
+}
+
+one2FiveInAsync()
+
+
+
+
+asynct function f() {
+	await Promise.reject('出错了！');
+}
+f().then(v => console.log(v))
+	.catch(e => console.log(e))
+// 出错了
+
+
+
+async function f() {
+	await Promise.reject('出错了');
+	await Promise.resolve('hello world'); // 不会执行
+} 
+
+
+
+
+async function f() {
+	try{
+		await Promise.reject('出错了');
+	}catch(e){}
+	return await Promise.resolve('hello world!');
+}
+
+f().then(v => console.log(v));
+// hello world!
+
+
+
+async function f() {
+	await Promise.reject('出错了')
+		.catch(e => console.log(e));
+	return await Promise.resolve('hello world!');
+}
+f().then(v => console.log(v));
+// 出错了
+// hello world
+
+
+
+async function f() {
+	await new Promise(function(resolve, reject) {
+		throw new Error('出错了');
+	});
+}
+
+f().then(v => console.log(v))
+	.catch(e => console.log(e))
+// Error: 出错了
+
+
+
+
+async function f() {
+	try{
+		await new Promise(function(resolve, reject) {
+			throw new Error('出错了');
+		})
+	} catch(e) {}
+	
+	return await('hello world!');
+}
+
+
+async function main() {
+	try {
+		const val1 = await firstStep();
+		const val2 = await secondStep(val1);
+		const val3 = await thirdStep(val1, val2);
+
+		console.log('Final: ', val3);
+	} catch(err) {
+		console.log(err);
+	}
+}
+
+
+
+const superagent = require('superagent');
+const NUM_RETRIES = 3;
+
+async function test() {
+	let i;
+	for(i = 0; i < NUM_RETRIES; ++i) {
+		try {
+			await superagent.get('http://google.com/this-throws-an-error');
+			break;
+		} catch(err) {}
+	}
+	console.log(i); // 3
+}
+
+test();
+
+
+
+
+async function myFunction() {
+	try {
+		await somethingThatReturnsAPromise();
+	} catch(err) {
+		console.log(err);
+	}
+}
+
+// 另一种写法
+async function myFunction() {
+	await somethingThatReturnsAPromise()
+		.catch(function(err) {
+			console.log(err);
+		})
+}
+
+
+
+let foo = await getFoo();
+let bar = await getBar();
+
+
+// 写法一
+let [foo, bar] = await Promise.all([getFoo(), getBar()]);
+
+// 写法二
+let fooPromise = getFoo();
+let barPromise = getBar();
+let foo = await fooPromise;
+let bar = await barPromise;
+
+
+
+async function dbFunc(db) {
+	let docs = [{}, {}, {}];
+
+	// 报错
+	docs.forEach(function(doc) {
+		await db.post(doc);
+	})
+}
+
+
+fnction dbFunc(db) { // 这里不需要async
+	let docs = [{}, {}, {}]
+	
+	// 可能得到错误的结果
+	docs.forEach(async function(doc) {
+		await db.post(doc)
+	});
+}
+
+
+
+async function dbFunc(db) {
+	let docs = [{}, {}, {}];
+
+	for(let doc of docs) {
+		await db.post(doc);
+	}
+}
+
+
+
+
+async function dbFunc(db) {
+	let docs = [{}, {}, {}];
+	let promises = docs.map((doc) => db.post(doc));
+
+	let results = await Promise.all(promises);
+	console.log(results);
+}
+
+// 或者使用下面的写法
+
+async function dbFunc(db) {
+	let docs = [{}, {}, {}];
+	let promises = docs.map((doc) => db.post(doc));
+
+	let results = [];
+	for(let promise of promises) {
+		resutls.push(await promise);
+	}
+	console.log(results);
+}
+
+
+
+
+
+const a = () => {
+	b().then(() => c());
+};
+
+const a = async () => {
+	await b();
+	c();
+}
+
+
+
+/* 4.async函数的实现原理 */
+
+async function fn(args) {
+	// ...
+}
+// 等同于
+function fn(args) {
+	return spawn(function* () {
+		// ...
+	});
+}
+
+
+function spawn(genF) {
+	return new Promise(function(resolve, reject) {
+		const gen = genF();
+		function step(nextF) {
+			let next;
+			try {
+				next = nextF();
+			} catch(e) {
+				return reject(e);
+			}
+			if(next.done) {
+				return resolve(next.value);
+			}
+
+			Promise.resolve(next.value).then(function(v) {
+				step(function() { return gen.next(v); });
+			}, function(e) {
+				step(function() { return gen.throw(e); });
+			});
+		}
+		step(function() { return gen.next(undefined); });
+	})
+}
+
+
+
+
+/* 5.与其他异步处理方法的比较 */
+
+// Promise
+function chainAnimationsPromise(elem, animations) {
+	// 变量ret用来保存上一个动画的返回值
+	let ret = null;
+
+	// 新建一个空的Promise
+	let p = Promise.resolve();
+
+	// 使用then方法，添加所有动画
+	for(let anim of animations) {
+		p = p.then(function(val) {
+			ret = val;
+			return anim(elem);
+		});
+	}
+
+	// 返回一个部署了错误捕捉机制的Promise
+	return p.catch(function(e) {
+		// 忽略错误，继续执行
+	}).then(function() {
+		return ret;
+	})
+}
+
+
+
+function chainAnimationsGenerator(elem, animations) {
+	return spawn(function* () {
+		let ret = null;
+		try {
+			for(let anim of animations) {
+				ret = yield anim(elem)
+			}
+		} catch(e) {
+			// 忽略错误， 继续执行
+		}
+
+		return ret;
+	})
+}
+
+
+
+
+async function chainAnimationsAsync(elem, animations) {
+	let ret = null;
+	try {
+		for(let anim of animations) {
+			ret = await anim(elem);
+		}
+	} catch(e) {
+		// 忽略错误， 继续执行
+	}
+	return ret;
+}
+
+
+
+
+
+/* 6.实例：按顺序完成异步操作 */
+function logInOrder(urls) {
+	// 远程读取所有URL
+	const textPromises = urls.map(url => {
+		return fetch(url).then(response => response.text());
+	});
+	
+	// 按次序输出
+	textPromises.reduce((chain, textPromise) => {
+		return chain.then(() => textPromise)
+			.then(text => console.log(text));
+	}, Promise.resolve());
+}
+
+
+
+async function logInOrder(urls) {
+	for(const url of urls) {
+		const response = await fetch(url);
+		console.log(await response.text());
+	}
+}
+
+
+
+async function logInOrder(urls) {
+	// 并发读取远程URL
+	const textPromises = urls.map(async url => {
+		const response = await fetch(url);
+		return response.text();
+	});
+
+	// 按次序输出
+	for(const textPromise of textPromises) {
+		console.log(await textPromise);
+	}
+}
+
+
+
+
+/* 7.顶层await */
+// awaiting.js
+let output;
+async function main() {
+	const dynamic = await import(someMission);
+	const data = await fetch(url);
+	output = someProcess(dynamic.default, data);
+}
+main();
+export { output }
+
+
+
+
+// awaiting.js
+let output;
+(async function main() {
+	const dynamic = await import(someMission);
+	const data = await fetch(url);
+	output = someProcess(dynamic.default, data);
+})();
+export { output }
+
+
+usage.js
+import { output } from './awating.js';
+function outputPlusValue(value) {
+	return output + value
+}
+
+console.log(outputPlusValue(100));
+setTimeout(() => console.log(outputPlusValue(100), 1000)
+
+
+
+// awaiting.js
+let output;
+export default(async function main() {
+	const dynamic = await import(someMission);
+	const data = await fetch(url);
+	output = someProcess(dynamic.default, data);
+})();
+export { output };
+
+
+// usage.js
+import promise, { output } from './awaiting.js';
+function outputPlusValue(value) {
+	return output + v
+}
+promise.then(() => {
+	console.log(outputPlusValue(100));
+	setTimeout(() => console.log(outputPlusValue(100), 1000);
+});
+
+
+
+// awaiting.js
+const dynamic = import(someMission);
+const data = fetch(url);
+export const output = someProcess((await dynamic).default, await data);
+
+// usage.js
+import { output } from './awaiting.js';
+function outputPlusValue(value) {
+	return output + value
+}
+console.log(outputPlusValue(100));
+setTimeout(() => console.log(outputPlusValue(100), 1000)
+
+
+
+
+// import()方法加载
+const strings = await import(`/i18n/${navigator.language}`);
+
+// 数据库操作
+const connection = await dbConnector();
+
+// 依赖回滚
+let jQuery
+try {
+	jQuery = await import('https://cdn-a.com/jQuery');
+} catch {
+	jQuery = await import('https://cdn-b.com/jQuery');
+}
+
+
+
+// x.js
+console.log('X1');
+await new Promise(r => setTimeout(r, 1000));
+console.log('X2');
+
+// y.js
+console.log('Y');
+
+// z.js
+import './x.js';
+import './y.js';
+console.log('Z');
+
+
+
+
+
+
+
+
+
+
 
 
 
